@@ -24,12 +24,12 @@ public class MainForm {
         frame.setVisible(true);
     }
 
-    private void init(){
+    private void init() {
 
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JPanel panel = (JPanel)e.getComponent();
+                JPanel panel = (JPanel) e.getComponent();
                 boolean revertValue = !values.get(panel);
                 values.put(panel, revertValue);
                 panel.setBackground(getColor(revertValue));
@@ -56,7 +56,7 @@ public class MainForm {
 
     }
 
-    private static Color getColor(boolean value){
-        return value? Color.DARK_GRAY : Color.LIGHT_GRAY;
+    private static Color getColor(boolean value) {
+        return value ? Color.DARK_GRAY : Color.LIGHT_GRAY;
     }
 }
