@@ -11,7 +11,7 @@ public class Field {
         this.field = field;
     }
 
-    boolean getCell(int i, int j) {
+    public boolean getCell(int i, int j) {
         return field[i][j];
     }
 

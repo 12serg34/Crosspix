@@ -9,15 +9,19 @@ public class Numbers {
     private int depth;
     private int[][] numbers;
 
-    int getSize() {
+    public Numbers(Field field, NumbersSide side) {
+        count(field, side);
+    }
+
+    public int getSize() {
         return size;
     }
 
-    int[] getVector(int index) {
+    public int[] getVector(int index) {
         return Arrays.copyOf(numbers[index], numbers[index].length);
     }
 
-    public void count(Field field, NumbersSide side) {
+    private void count(Field field, NumbersSide side) {
         switch (side) {
             case Top:
                 countTop(field);

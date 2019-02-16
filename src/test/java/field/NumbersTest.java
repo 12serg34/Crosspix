@@ -15,8 +15,7 @@ class NumbersTest {
                 {false}
         };
 
-        Numbers numbers = new Numbers();
-        numbers.count(new Field(field), NumbersSide.Top);
+        Numbers numbers = new Numbers(new Field(field), NumbersSide.Top);
 
         int size = numbers.getSize();
         assertEquals(1, size);
@@ -33,8 +32,7 @@ class NumbersTest {
                 {true}
         };
 
-        Numbers numbers = new Numbers();
-        numbers.count(new Field(field), NumbersSide.Top);
+        Numbers numbers = new Numbers(new Field(field), NumbersSide.Top);
 
         int size = numbers.getSize();
         assertEquals(1, size);
@@ -51,8 +49,7 @@ class NumbersTest {
                 {true}
         };
 
-        Numbers numbers = new Numbers();
-        numbers.count(new Field(field), NumbersSide.Top);
+        Numbers numbers = new Numbers(new Field(field), NumbersSide.Top);
 
         int size = numbers.getSize();
         assertEquals(1, size);
@@ -84,11 +81,10 @@ class NumbersTest {
 
         Field field = new Field(fieldValues);
 
-        Numbers numbers = new Numbers();
-        numbers.count(field, NumbersSide.Top);
+        Numbers numbers = new Numbers(field, NumbersSide.Top);
         assertEqualsNumbers(topNumbers, numbers);
 
-        numbers.count(field, NumbersSide.Left);
+        numbers = new Numbers(field, NumbersSide.Left);
         assertEqualsNumbers(leftNumbers, numbers);
     }
 
