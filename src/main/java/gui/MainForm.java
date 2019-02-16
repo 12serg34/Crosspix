@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainForm {
+    private static final int FONT_SIZE = 32;
     private JPanel mainPanel;
     private JPanel fieldPanel;
     private JPanel leftNumbersPanel;
-    private Map<JPanel, Boolean> values;
 
     public static void main(String[] args) {
         MainForm mainForm = new MainForm();
@@ -30,6 +30,8 @@ public class MainForm {
     }
 
     private void init() {
+        final Map<JPanel, Boolean> values = new HashMap<>();
+
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -42,8 +44,7 @@ public class MainForm {
 
         int width = 5;
         int height = 5;
-        Field field = FieldGenerator.generate(width, height);
-        values = new HashMap<>();
+        Field field = FieldGenerator.generate(height, width);
         fieldPanel.setLayout(new GridLayout(height, width));
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -63,7 +64,8 @@ public class MainForm {
         JPanel[][] grid = new JPanel[size][depth];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < depth; j++) {
-                leftNumbersPanel.add(grid[i][j] = new JPanel(new GridLayout(1, 1)));
+                grid[i][j] = new JPanel(new GridLayout(1, 1));
+                leftNumbersPanel.add(grid[i][j]);
             }
         }
 
@@ -71,7 +73,7 @@ public class MainForm {
             int[] vector = leftNumbers.getVector(s);
             for (int l = 0; l < vector.length; l++) {
                 JLabel label = new JLabel(String.valueOf(vector[l]));
-                label.setFont(new Font("TimesNewRoman", Font.PLAIN, 32));
+                label.setFont(new Font("TimesNewRoman", Font.PLAIN, FONT_SIZE));
                 label.setHorizontalAlignment(SwingConstants.RIGHT);
                 grid[s][depth - vector.length + l].add(label);
             }
