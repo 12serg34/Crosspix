@@ -16,11 +16,11 @@ public class Main {
         System.out.println(field);
 
         System.out.println("--top--");
-        Numbers topNumbers = new Numbers(field, NumbersSide.Top);
+        Numbers topNumbers = new Numbers(field, NumbersSide.TOP);
         System.out.println(topNumbers);
 
         System.out.println("--left--");
-        Numbers leftNumbers = new Numbers(field, NumbersSide.Left);
+        Numbers leftNumbers = new Numbers(field, NumbersSide.LEFT);
         System.out.println(leftNumbers);
     }
 }

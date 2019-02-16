@@ -17,6 +17,7 @@ public class MainForm {
     private JPanel mainPanel;
     private JPanel fieldPanel;
     private JPanel leftNumbersPanel;
+    private JPanel topNumbersPanel;
 
     public static void main(String[] args) {
         MainForm mainForm = new MainForm();
@@ -57,7 +58,7 @@ public class MainForm {
             }
         }
 
-        Numbers leftNumbers = new Numbers(field, NumbersSide.Left);
+        Numbers leftNumbers = new Numbers(field, NumbersSide.LEFT);
         int size = leftNumbers.getSize();
         int depth = leftNumbers.getDepth();
         leftNumbersPanel.setLayout(new GridLayout(size, depth));
@@ -71,11 +72,34 @@ public class MainForm {
 
         for (int s = 0; s < size; s++) {
             int[] vector = leftNumbers.getVector(s);
-            for (int l = 0; l < vector.length; l++) {
-                JLabel label = new JLabel(String.valueOf(vector[l]));
+            for (int d = 0; d < vector.length; d++) {
+                JLabel label = new JLabel(String.valueOf(vector[d]));
                 label.setFont(new Font("TimesNewRoman", Font.PLAIN, FONT_SIZE));
                 label.setHorizontalAlignment(SwingConstants.RIGHT);
-                grid[s][depth - vector.length + l].add(label);
+                grid[s][depth - vector.length + d].add(label);
+            }
+        }
+
+        Numbers topNumbers = new Numbers(field, NumbersSide.TOP);
+        size = topNumbers.getSize();
+        depth = topNumbers.getDepth();
+        topNumbersPanel.setLayout(new GridLayout(depth, size));
+        grid = new JPanel[depth][size];
+        for (int i = 0; i < depth; i++) {
+            for (int j = 0; j < size; j++) {
+                grid[i][j] = new JPanel(new GridLayout(1, 1));
+                topNumbersPanel.add(grid[i][j]);
+            }
+        }
+
+        for (int s = 0; s < size; s++) {
+            int[] vector = topNumbers.getVector(s);
+            for (int d = 0; d < vector.length; d++) {
+                JLabel label = new JLabel(String.valueOf(vector[d]));
+                label.setFont(new Font("TimesNewRoman", Font.PLAIN, FONT_SIZE));
+                label.setVerticalAlignment(SwingConstants.BOTTOM);
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                grid[depth - vector.length + d][s].add(label);
             }
         }
     }

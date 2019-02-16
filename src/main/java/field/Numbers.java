@@ -27,10 +27,10 @@ public class Numbers {
 
     private void count(Field field, NumbersSide side) {
         switch (side) {
-            case Top:
+            case TOP:
                 countTop(field);
                 break;
-            case Left:
+            case LEFT:
                 countLeft(field);
                 break;
         }
