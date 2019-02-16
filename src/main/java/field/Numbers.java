@@ -17,6 +17,10 @@ public class Numbers {
         return size;
     }
 
+    public int getDepth() {
+        return depth;
+    }
+
     public int[] getVector(int index) {
         return Arrays.copyOf(numbers[index], numbers[index].length);
     }

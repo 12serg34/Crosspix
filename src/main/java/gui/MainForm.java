@@ -58,18 +58,23 @@ public class MainForm {
 
         Numbers leftNumbers = new Numbers(field, NumbersSide.Left);
         int size = leftNumbers.getSize();
-        leftNumbersPanel.setLayout(new GridLayout(size, 1));
+        int depth = leftNumbers.getDepth();
+        leftNumbersPanel.setLayout(new GridLayout(size, depth));
+        JPanel[][] grid = new JPanel[size][depth];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < depth; j++) {
+                leftNumbersPanel.add(grid[i][j] = new JPanel(new GridLayout(1, 1)));
+            }
+        }
+
         for (int s = 0; s < size; s++) {
             int[] vector = leftNumbers.getVector(s);
-            JPanel panel = new JPanel();
-            panel.setLayout(new GridLayout(1, vector.length));
-            for (int i : vector) {
-                JLabel label = new JLabel(String.valueOf(i));
+            for (int l = 0; l < vector.length; l++) {
+                JLabel label = new JLabel(String.valueOf(vector[l]));
                 label.setFont(new Font("TimesNewRoman", Font.PLAIN, 32));
-                label.setHorizontalAlignment(SwingConstants.CENTER);
-                panel.add(label);
+                label.setHorizontalAlignment(SwingConstants.RIGHT);
+                grid[s][depth - vector.length + l].add(label);
             }
-            leftNumbersPanel.add(panel);
         }
     }
 
