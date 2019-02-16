@@ -16,13 +16,19 @@ public class MainForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
     private static final Dimension PREFERRED_FORM_SIZE = new Dimension(800, 800);
     private static final Dimension DEFAULT_FIELD_SIZE = new Dimension(10, 10);
+    private static final Color ERROR_COLOR = Color.RED;
+    private static final int INITIAL_ATTEMPTS = 3;
 
     private JPanel mainPanel;
     private JPanel fieldPanel;
     private JPanel leftNumbersPanel;
     private JPanel topNumbersPanel;
-    private Field guessedField;
     private Map<JPanel, Point> panelToPoint;
+
+    private Field stashedField;
+    private Field guessedField;
+    private int attempts;
+    private int cellsToOpen;
 
     public static void main(String[] args) {
         MainForm mainForm = new MainForm();
@@ -37,12 +43,25 @@ public class MainForm {
     }
 
     private void initialize() {
+        attempts = INITIAL_ATTEMPTS;
         int width = DEFAULT_FIELD_SIZE.width;
         int height = DEFAULT_FIELD_SIZE.height;
-        Field stashedField = FieldGenerator.generate(height, width);
+        stashedField = FieldGenerator.generate(height, width);
+        countCellsToOpen();
         initializeField(height, width, new FormMouseAdapter());
         initializeLeftNumbers(stashedField);
         initializeTopNumbers(stashedField);
+    }
+
+    private void countCellsToOpen() {
+        cellsToOpen = 0;
+        for (int i = 0; i < stashedField.getHeight(); i++) {
+            for (int j = 0; j < stashedField.getWidth(); j++) {
+                if (stashedField.getCell(i, j)) {
+                    cellsToOpen++;
+                }
+            }
+        }
     }
 
     private void initializeTopNumbers(Field field) {
@@ -99,9 +118,9 @@ public class MainForm {
     }
 
     private void initializeField(int height, int width, MouseAdapter mouseAdapter) {
+        panelToPoint = new HashMap<>();
         guessedField = new Field(height, width);
         fieldPanel.setLayout(new GridLayout(height, width));
-        panelToPoint = new HashMap<>();
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 JPanel panel = new JPanel();
@@ -110,6 +129,20 @@ public class MainForm {
                 panelToPoint.put(panel, new Point(j, i));
                 fieldPanel.add(panel);
             }
+        }
+    }
+
+    private boolean validate(int i, int j) {
+        boolean guessedValue = guessedField.getCell(i, j);
+        boolean stashedValue = stashedField.getCell(i, j);
+        if (guessedValue == stashedValue) {
+            if (--cellsToOpen == 0) {
+                System.out.println("Congratulations!!!");
+            }
+            return true;
+        } else {
+            System.out.println("Bad luck, attempts left: " + --attempts);
+            return false;
         }
     }
 
@@ -122,10 +155,14 @@ public class MainForm {
         public void mouseClicked(MouseEvent e) {
             JPanel panel = (JPanel) e.getComponent();
             Point point = panelToPoint.get(panel);
-            boolean revertValue = !guessedField.getCell(point.y, point.x);
-            guessedField.setCell(revertValue, point.y, point.x);
-            panel.setBackground(getColor(revertValue));
-
+            int i = point.y, j = point.x;
+            boolean revertValue = !guessedField.getCell(i, j);
+            guessedField.setCell(revertValue, i, j);
+            if (validate(i, j)) {
+                panel.setBackground(getColor(revertValue));
+            } else {
+                panel.setBackground(ERROR_COLOR);
+            }
         }
     }
 }

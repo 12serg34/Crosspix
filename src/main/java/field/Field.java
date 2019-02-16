@@ -25,11 +25,11 @@ public class Field {
         field[i][j] = value;
     }
 
-    int getWidth() {
+    public int getWidth() {
         return width;
     }
 
-    int getHeight() {
+    public int getHeight() {
         return height;
     }
 
