@@ -5,6 +5,12 @@ public class Field {
     private int height;
     private boolean[][] field;
 
+    public Field(int height, int width) {
+        this.height = height;
+        this.width = width;
+        this.field = new boolean[height][width];
+    }
+
     Field(boolean[][] field) {
         this.height = field.length;
         this.width = field[0].length;
@@ -13,6 +19,10 @@ public class Field {
 
     public boolean getCell(int i, int j) {
         return field[i][j];
+    }
+
+    public void setCell(boolean value, int i, int j) {
+        field[i][j] = value;
     }
 
     int getWidth() {
