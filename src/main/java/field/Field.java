@@ -4,6 +4,7 @@ public class Field {
     private int width;
     private int height;
     private boolean[][] field;
+    private int amountOfFullCells;
 
     public Field(int height, int width) {
         this.height = height;
@@ -15,22 +16,30 @@ public class Field {
         this.height = field.length;
         this.width = field[0].length;
         this.field = field;
+        countFullCells();
+    }
+
+    int getWidth() {
+        return width;
+    }
+
+    int getHeight() {
+        return height;
     }
 
     public boolean getCell(int i, int j) {
         return field[i][j];
     }
 
+    public int getAmountOfFullCells() {
+        return amountOfFullCells;
+    }
+
     public void setCell(boolean value, int i, int j) {
         field[i][j] = value;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
+        if (value) {
+            amountOfFullCells++;
+        }
     }
 
     @Override
@@ -44,5 +53,16 @@ public class Field {
             builder.append("\n");
         }
         return builder.toString();
+    }
+
+    private void countFullCells() {
+        amountOfFullCells = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (field[i][j]) {
+                    amountOfFullCells++;
+                }
+            }
+        }
     }
 }
