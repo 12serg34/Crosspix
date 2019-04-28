@@ -1,4 +1,4 @@
-package field;
+package picture;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +9,8 @@ public class Numbers {
     private int depth;
     private int[][] numbers;
 
-    public Numbers(Field field, NumbersSide side) {
-        count(field, side);
+    public Numbers(StashedPicture picture, NumbersSide side) {
+        count(picture, side);
     }
 
     public int getSize() {
@@ -25,27 +25,27 @@ public class Numbers {
         return Arrays.copyOf(numbers[index], numbers[index].length);
     }
 
-    private void count(Field field, NumbersSide side) {
+    private void count(StashedPicture picture, NumbersSide side) {
         switch (side) {
             case TOP:
-                countTop(field);
+                countTop(picture);
                 break;
             case LEFT:
-                countLeft(field);
+                countLeft(picture);
                 break;
         }
     }
 
-    private void countTop(Field field) {
+    private void countTop(StashedPicture picture) {
         depth = 0;
-        size = field.getWidth();
+        size = picture.getWidth();
         numbers = new int[size][];
         for (int j = 0; j < size; j++) {
             int amount = 0;
             List<Integer> column = new ArrayList<>();
 
-            for (int i = 0; i < field.getHeight(); i++) {
-                if (field.getCell(i, j)) {
+            for (int i = 0; i < picture.getHeight(); i++) {
+                if (picture.getCell(i, j)) {
                     amount++;
                 } else {
                     if (amount > 0) {
@@ -64,16 +64,16 @@ public class Numbers {
         }
     }
 
-    private void countLeft(Field field) {
+    private void countLeft(StashedPicture picture) {
         depth = 0;
-        size = field.getHeight();
+        size = picture.getHeight();
         numbers = new int[size][];
         for (int i = 0; i < size; i++) {
             int amount = 0;
             List<Integer> row = new ArrayList<>();
 
-            for (int j = 0; j < field.getWidth(); j++) {
-                if (field.getCell(i, j)) {
+            for (int j = 0; j < picture.getWidth(); j++) {
+                if (picture.getCell(i, j)) {
                     amount++;
                 } else {
                     if (amount > 0) {

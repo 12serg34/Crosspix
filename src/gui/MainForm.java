@@ -1,16 +1,13 @@
 package gui;
 
-import field.Field;
-import field.FieldGenerator;
-import field.Numbers;
-import field.NumbersSide;
+import picture.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Map;
 
 public class MainForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
@@ -20,18 +17,24 @@ public class MainForm {
     private static final Color EMPTY_CELL_COLOR = Color.GRAY;
     private static final Color MISTAKE_COLOR = Color.RED;
     private static final Color BLANK_COLOR = Color.WHITE;
-    private static final int INITIAL_ATTEMPTS = 3;
+    static final EnumMap<CellState, Color> stateToColor;
+
+    static {
+        stateToColor = new EnumMap<>(CellState.class);
+        stateToColor.put(CellState.BLANK, BLANK_COLOR);
+        stateToColor.put(CellState.EMPTY, EMPTY_CELL_COLOR);
+        stateToColor.put(CellState.SUCCESS, FULL_CELL_COLOR);
+        stateToColor.put(CellState.MISTAKE, MISTAKE_COLOR);
+    }
 
     private JPanel mainPanel;
     private JPanel fieldPanel;
     private JPanel leftNumbersPanel;
     private JPanel topNumbersPanel;
-    private Map<JPanel, Point> panelToPoint;
 
-    private Field stashedField;
-    private Field guessedField;
-    private int attempts;
-    private int discoveredCells;
+    HashMap<JPanel, Point> panelToPoint;
+    private StashedPicture stashedField;
+    GuessedPicture guessedPicture;
 
     public static void main(String[] args) {
         MainForm mainForm = new MainForm();
@@ -46,25 +49,26 @@ public class MainForm {
     }
 
     private void initialize() {
-        attempts = INITIAL_ATTEMPTS;
         int width = DEFAULT_FIELD_SIZE.width;
         int height = DEFAULT_FIELD_SIZE.height;
-        stashedField = FieldGenerator.generate(height, width);
+        stashedField = StashedPicture.generate(height, width);
+        guessedPicture = new GuessedPicture(stashedField);
         initializeLeftNumbers();
         initializeTopNumbers();
-        initializeField(height, width, new FormMouseAdapter());
+        initializeField(height, width);
     }
 
-    private void initializeField(int height, int width, MouseAdapter mouseAdapter) {
-        panelToPoint = new HashMap<>();
-        guessedField = new Field(height, width);
+    private void initializeField(int height, int width) {
+        panelToPoint = new HashMap<>(height * width);
         fieldPanel.setLayout(new GridLayout(height, width));
+        MouseListener mouseAdapter = new FormMouseAdapter();
+        Border lineBorder = BorderFactory.createLineBorder(Color.YELLOW);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 JPanel panel = new JPanel();
                 panel.addMouseListener(mouseAdapter);
                 panel.setBackground(BLANK_COLOR);
-                panel.setBorder(BorderFactory.createLineBorder(Color.YELLOW));
+                panel.setBorder(lineBorder);
                 panelToPoint.put(panel, new Point(j, i));
                 fieldPanel.add(panel);
             }
@@ -77,21 +81,23 @@ public class MainForm {
         int depth = leftNumbers.getDepth();
         JPanel[][] grid = new JPanel[size][depth];
         leftNumbersPanel.setLayout(new GridLayout(size, depth));
+        GridLayout layout = new GridLayout(1, 1);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < depth; j++) {
-                grid[i][j] = new JPanel(new GridLayout(1, 1));
+                grid[i][j] = new JPanel(layout);
                 leftNumbersPanel.add(grid[i][j]);
             }
         }
 
-        for (int s = 0; s < size; s++) {
-            int[] vector = leftNumbers.getVector(s);
-            int shift = depth - vector.length;
-            for (int d = 0; d < vector.length; d++) {
-                JLabel label = new JLabel(String.valueOf(vector[d]));
+        for (int i = 0; i < size; i++) {
+            int[] vector = leftNumbers.getVector(i);
+            int length = vector.length;
+            int shift = depth - length;
+            for (int j = 0; j < length; j++) {
+                JLabel label = new JLabel(String.valueOf(vector[j]));
                 label.setHorizontalAlignment(SwingConstants.RIGHT);
                 label.setFont(DEFAULT_FONT);
-                grid[s][d + shift].add(label);
+                grid[i][j + shift].add(label);
             }
         }
     }
@@ -102,37 +108,33 @@ public class MainForm {
         int depth = topNumbers.getDepth();
         JPanel[][] grid = new JPanel[depth][size];
         topNumbersPanel.setLayout(new GridLayout(depth, size));
-
+        GridLayout layout = new GridLayout(1, 1);
         for (int i = 0; i < depth; i++) {
             for (int j = 0; j < size; j++) {
-                grid[i][j] = new JPanel(new GridLayout(1, 1));
+                grid[i][j] = new JPanel(layout);
                 topNumbersPanel.add(grid[i][j]);
             }
         }
 
-        for (int s = 0; s < size; s++) {
-            int[] vector = topNumbers.getVector(s);
-            int shift = depth - vector.length;
-            for (int d = 0; d < vector.length; d++) {
-                JLabel label = new JLabel(String.valueOf(vector[d]));
+        for (int i = 0; i < size; i++) {
+            int[] vector = topNumbers.getVector(i);
+            int length = vector.length;
+            int shift = depth - length;
+            for (int j = 0; j < length; j++) {
+                JLabel label = new JLabel(String.valueOf(vector[j]));
                 label.setHorizontalAlignment(SwingConstants.CENTER);
                 label.setVerticalAlignment(SwingConstants.BOTTOM);
                 label.setFont(DEFAULT_FONT);
-                grid[d + shift][s].add(label);
+                grid[j + shift][i].add(label);
             }
         }
     }
 
-    private boolean tryToOpenCell(int i, int j) {
-        if (stashedField.getCell(i, j)) {
-            guessedField.setCell(true, i, j);
-            if (++discoveredCells == stashedField.getAmountOfFullCells()) {
-                System.out.println("Congratulations!!!");
-            }
-            return true;
-        } else {
-            System.out.println("Bad luck, attempts left: " + --attempts);
-            return false;
+    @SuppressWarnings("WeakerAccess")
+    void tryToComplete(CellState newCellState) {
+        if (newCellState == CellState.SUCCESS
+                && guessedPicture.getAmountOfSuccesses() == stashedField.getAmountOfFullCells()) {
+            System.out.println("Congratulations!!!");
         }
     }
 
@@ -145,17 +147,16 @@ public class MainForm {
         public void mouseClicked(MouseEvent e) {
             JPanel panel = (JPanel) e.getComponent();
             Point point = panelToPoint.get(panel);
-            Color background = panel.getBackground();
+            CellState currentCellState = guessedPicture.getCell(point.y, point.x);
+            CellState newCellState = currentCellState;
             if (e.getButton() == leftMouseButton) {
-                if (background == BLANK_COLOR) {
-                    panel.setBackground(tryToOpenCell(point.y, point.x) ? FULL_CELL_COLOR : MISTAKE_COLOR);
-                }
+                newCellState = guessedPicture.tryToFullCell(point.y, point.x);
             } else if (e.getButton() == rightMouseButton) {
-                if (background == BLANK_COLOR) {
-                    panel.setBackground(EMPTY_CELL_COLOR);
-                } else if (background == EMPTY_CELL_COLOR) {
-                    panel.setBackground(BLANK_COLOR);
-                }
+                newCellState = guessedPicture.toggleEmpty(point.y, point.x);
+            }
+            if (newCellState != currentCellState) {
+                panel.setBackground(stateToColor.get(newCellState));
+                tryToComplete(newCellState);
             }
         }
     }

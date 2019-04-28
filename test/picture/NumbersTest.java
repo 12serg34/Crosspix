@@ -1,4 +1,4 @@
-package field;
+package picture;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ class NumbersTest {
                 {false}
         };
 
-        Numbers numbers = new Numbers(new Field(field), NumbersSide.TOP);
+        Numbers numbers = new Numbers(new StashedPicture(field), NumbersSide.TOP);
 
         int size = numbers.getSize();
         assertEquals(1, size);
@@ -32,7 +32,7 @@ class NumbersTest {
                 {true}
         };
 
-        Numbers numbers = new Numbers(new Field(field), NumbersSide.TOP);
+        Numbers numbers = new Numbers(new StashedPicture(field), NumbersSide.TOP);
 
         int size = numbers.getSize();
         assertEquals(1, size);
@@ -49,7 +49,7 @@ class NumbersTest {
                 {true}
         };
 
-        Numbers numbers = new Numbers(new Field(field), NumbersSide.TOP);
+        Numbers numbers = new Numbers(new StashedPicture(field), NumbersSide.TOP);
 
         int size = numbers.getSize();
         assertEquals(1, size);
@@ -79,12 +79,12 @@ class NumbersTest {
                 {1, 1}
         };
 
-        Field field = new Field(fieldValues);
+        StashedPicture guessedPicture = new StashedPicture(fieldValues);
 
-        Numbers numbers = new Numbers(field, NumbersSide.TOP);
+        Numbers numbers = new Numbers(guessedPicture, NumbersSide.TOP);
         assertEqualsNumbers(topNumbers, numbers);
 
-        numbers = new Numbers(field, NumbersSide.LEFT);
+        numbers = new Numbers(guessedPicture, NumbersSide.LEFT);
         assertEqualsNumbers(leftNumbers, numbers);
     }
 
