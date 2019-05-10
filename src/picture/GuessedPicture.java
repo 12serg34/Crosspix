@@ -40,17 +40,20 @@ public class GuessedPicture {
         return field[i][j];
     }
 
-    public CellState tryToFullCell(int i, int j) {
+    public Answer discoverRequest(int i, int j) {
+        Answer answer = Answer.NOTHING;
         if (field[i][j] == CellState.BLANK) {
             if (stashedPicture.getCell(i, j)) {
-                field[i][j] = CellState.SUCCESS;
+                field[i][j] = CellState.FULL;
+                answer = Answer.SUCCESS;
                 amountOfSuccesses++;
             } else {
-                field[i][j] = CellState.MISTAKE;
+                field[i][j] = CellState.EMPTY;
+                answer = Answer.MISTAKE;
                 amountOfMistakes++;
             }
         }
-        return field[i][j];
+        return answer;
     }
 
     public CellState toggleEmpty(int i, int j) {

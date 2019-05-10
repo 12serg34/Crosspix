@@ -13,18 +13,19 @@ public class MainForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
     private static final Dimension PREFERRED_FORM_SIZE = new Dimension(800, 800);
     private static final Dimension DEFAULT_FIELD_SIZE = new Dimension(5, 5);
-    private static final Color FULL_CELL_COLOR = Color.BLACK;
-    private static final Color EMPTY_CELL_COLOR = Color.GRAY;
-    private static final Color MISTAKE_COLOR = Color.RED;
-    private static final Color BLANK_COLOR = Color.WHITE;
-    static final EnumMap<CellState, Color> stateToColor;
+    private static final int LEFT_MOUSE_BUTTON = MouseEvent.BUTTON1;
+    private static final int RIGHT_MOUSE_BUTTON = MouseEvent.BUTTON3;
+    private static final EnumMap<CellState, Color> stateToColor;
+    private static final EnumMap<Answer, Color> answerToColor;
 
     static {
         stateToColor = new EnumMap<>(CellState.class);
-        stateToColor.put(CellState.BLANK, BLANK_COLOR);
-        stateToColor.put(CellState.EMPTY, EMPTY_CELL_COLOR);
-        stateToColor.put(CellState.SUCCESS, FULL_CELL_COLOR);
-        stateToColor.put(CellState.MISTAKE, MISTAKE_COLOR);
+        stateToColor.put(CellState.BLANK, Color.WHITE);
+        stateToColor.put(CellState.EMPTY, Color.GRAY);
+
+        answerToColor = new EnumMap<>(Answer.class);
+        answerToColor.put(Answer.SUCCESS, Color.BLACK);
+        answerToColor.put(Answer.MISTAKE, Color.RED);
     }
 
     private JPanel mainPanel;
@@ -32,9 +33,9 @@ public class MainForm {
     private JPanel leftNumbersPanel;
     private JPanel topNumbersPanel;
 
-    HashMap<JPanel, Point> panelToPoint;
+    private HashMap<JPanel, Point> cellToPoint;
     private StashedPicture stashedField;
-    GuessedPicture guessedPicture;
+    private GuessedPicture guessedPicture;
 
     public static void main(String[] args) {
         MainForm mainForm = new MainForm();
@@ -59,7 +60,7 @@ public class MainForm {
     }
 
     private void initializeField(int height, int width) {
-        panelToPoint = new HashMap<>(height * width);
+        cellToPoint = new HashMap<>(height * width);
         fieldPanel.setLayout(new GridLayout(height, width));
         MouseListener mouseAdapter = new FormMouseAdapter();
         Border lineBorder = BorderFactory.createLineBorder(Color.YELLOW);
@@ -67,9 +68,9 @@ public class MainForm {
             for (int j = 0; j < width; j++) {
                 JPanel panel = new JPanel();
                 panel.addMouseListener(mouseAdapter);
-                panel.setBackground(BLANK_COLOR);
+                panel.setBackground(Color.WHITE);
                 panel.setBorder(lineBorder);
-                panelToPoint.put(panel, new Point(j, i));
+                cellToPoint.put(panel, new Point(j, i));
                 fieldPanel.add(panel);
             }
         }
@@ -130,34 +131,27 @@ public class MainForm {
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
-    void tryToComplete(CellState newCellState) {
-        if (newCellState == CellState.SUCCESS
-                && guessedPicture.getAmountOfSuccesses() == stashedField.getAmountOfFullCells()) {
+    private void tryToComplete(Answer answer) {
+        if (answer == Answer.SUCCESS && guessedPicture.getAmountOfSuccesses() == stashedField.getAmountOfFullCells()) {
             System.out.println("Congratulations!!!");
         }
     }
 
     private class FormMouseAdapter extends MouseAdapter {
-
-        private final int leftMouseButton = MouseEvent.BUTTON1;
-        private final int rightMouseButton = MouseEvent.BUTTON3;
-
         @Override
         public void mouseClicked(MouseEvent e) {
-            JPanel panel = (JPanel) e.getComponent();
-            Point point = panelToPoint.get(panel);
-            CellState currentCellState = guessedPicture.getCell(point.y, point.x);
-            CellState newCellState = currentCellState;
-            if (e.getButton() == leftMouseButton) {
-                newCellState = guessedPicture.tryToFullCell(point.y, point.x);
-            } else if (e.getButton() == rightMouseButton) {
-                newCellState = guessedPicture.toggleEmpty(point.y, point.x);
+            JPanel cell = (JPanel) e.getComponent();
+            Point point = cellToPoint.get(cell);
+            Color cellColor = cell.getBackground();
+            if (e.getButton() == LEFT_MOUSE_BUTTON) {
+                Answer answer = guessedPicture.discoverRequest(point.y, point.x);
+                cellColor = answerToColor.get(answer);
+                tryToComplete(answer);
+            } else if (e.getButton() == RIGHT_MOUSE_BUTTON) {
+                CellState cellState = guessedPicture.toggleEmpty(point.y, point.x);
+                cellColor = stateToColor.get(cellState);
             }
-            if (newCellState != currentCellState) {
-                panel.setBackground(stateToColor.get(newCellState));
-                tryToComplete(newCellState);
-            }
+            cell.setBackground(cellColor);
         }
     }
 }
