@@ -2,6 +2,7 @@ package server;
 
 import message.Message;
 import message.MessageHeader;
+import picture.StashedPicture;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,7 +43,9 @@ public class MessageService implements Runnable {
     }
 
     private Message waitNextMessage() throws IOException {
-        return Message.parse(reader.readLine());
+        Message message = Message.parse(reader.readLine());
+        System.out.println("Got " + message);
+        return message;
     }
 
     private void process(Message message) throws IOException {
@@ -50,7 +53,9 @@ public class MessageService implements Runnable {
             case START_GAME:
                 if (game == null) {
                     game = gamesPool.createGame();
-                    write(Message.GAME_CREATED);
+                    StashedPicture picture = StashedPicture.generate(5, 5);
+                    Message outputMessage = new Message(MessageHeader.GAME_STARTED, picture.toRaw());
+                    write(outputMessage);
                 }
                 break;
         }

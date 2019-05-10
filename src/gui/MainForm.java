@@ -1,21 +1,20 @@
 package gui;
 
+import client.ClientMessageProcessor;
+import client.ClientMessageReader;
 import message.Message;
-import message.MessageHeader;
 import picture.*;
 
+import javax.jws.soap.SOAPBinding;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Random;
 
 public class MainForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
@@ -33,7 +32,7 @@ public class MainForm {
 
         answerToColor = new EnumMap<>(Answer.class);
         answerToColor.put(Answer.SUCCESS, Color.BLACK);
-        answerToColor.put(Answer.MISTAKE, Color.RED);
+        answerToColor.put(Answer.MISTAKE, Color.GRAY);
     }
 
     private JPanel mainPanel;
@@ -44,67 +43,55 @@ public class MainForm {
     private HashMap<JPanel, Point> cellToPoint;
     private StashedPicture stashedField;
     private GuessedPicture guessedPicture;
+    private OutputStreamWriter writer;
+    private int height;
+    private int width;
 
     public static void main(String[] args) throws Exception {
         MainForm mainForm = new MainForm();
+        mainForm.connectToServer();
         mainForm.initialize();
 
         JFrame frame = new JFrame("MainForm");
         frame.setContentPane(mainForm.mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(PREFERRED_FORM_SIZE);
+        frame.addWindowListener(mainForm.new FrameWindowListener());
         frame.pack();
         frame.setVisible(true);
-
-        mainForm.connectToServer();
-    }
-
-    private void initialize() {
-        int height = DEFAULT_FIELD_SIZE.height;
-        int width = DEFAULT_FIELD_SIZE.width;
-        stashedField = StashedPicture.generate(height, width);
-        guessedPicture = new LocalGuessedPicture(stashedField);
-        guessedPicture.setListenerOfComplete(this::complete);
-        initializeLeftNumbers();
-        initializeTopNumbers();
-        initializeField(height, width);
     }
 
     private void connectToServer() throws Exception {
         System.out.println("Client started");
-        Socket socket = new Socket("localhost", 14500);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        new Thread(() -> {
-            try {
-                Message message = Message.EMPTY;
-                while (message.getHeader() != MessageHeader.STOP_SESSION) {
-                    System.out.println(message);
-                    message = Message.parse(reader.readLine());
-                }
-                System.out.println(message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
 
-        OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+        ClientMessageProcessor processor = new ClientMessageProcessor();
+        processor.setCreateGameListener(this::setStashedField);
+
+        Socket socket = new Socket("localhost", 14500);
+        ClientMessageReader.start(socket, processor);
+
+        writer = new OutputStreamWriter(socket.getOutputStream());
         {
             Message message = Message.START_GAME;
             writer.write(message + "\n");
             writer.flush();
+            System.out.println("Sent " + message);
         }
         Thread.sleep(3000);
-        writer.write(Message.STOP_SESSION + "\n");
-        writer.flush();
     }
 
-    private void initializeField(int height, int width) {
+    private void initialize() {
+//        height = DEFAULT_FIELD_SIZE.height;
+//        width = DEFAULT_FIELD_SIZE.width;
+//        stashedField = StashedPicture.generate(height, width);
+        guessedPicture = new LocalGuessedPicture(stashedField);
+        guessedPicture.setListenerOfComplete(this::complete);
+        initializeLeftNumbers();
+        initializeTopNumbers();
+        initializeField();
+    }
+
+    private void initializeField() {
         cellToPoint = new HashMap<>(height * width);
         fieldPanel.setLayout(new GridLayout(height, width));
         MouseListener mouseAdapter = new FormMouseAdapter();
@@ -180,6 +167,12 @@ public class MainForm {
         System.out.println("Congratulations!!!");
     }
 
+    private void setStashedField(StashedPicture stashedPicture) {
+        stashedField = stashedPicture;
+        height = stashedPicture.getHeight();
+        width = stashedPicture.getWidth();
+    }
+
     private class FormMouseAdapter extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -188,12 +181,28 @@ public class MainForm {
             Color cellColor = cell.getBackground();
             if (e.getButton() == LEFT_MOUSE_BUTTON) {
                 Answer answer = guessedPicture.discoverRequest(point.y, point.x);
-                cellColor = answerToColor.get(answer);
+                if (answer != Answer.NOTHING) {
+                    cellColor = answerToColor.get(answer);
+                }
             } else if (e.getButton() == RIGHT_MOUSE_BUTTON) {
                 CellState cellState = guessedPicture.toggleEmpty(point.y, point.x);
                 cellColor = stateToColor.get(cellState);
             }
             cell.setBackground(cellColor);
+        }
+    }
+
+    private class FrameWindowListener extends WindowAdapter {
+        @Override
+        public void windowClosed(WindowEvent e) {
+            try {
+                Message stopSession = Message.STOP_SESSION;
+                writer.write(stopSession + "\n");
+                writer.flush();
+                System.out.println("Sent " + stopSession);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 }

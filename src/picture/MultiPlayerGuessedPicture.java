@@ -1,6 +1,6 @@
 package picture;
 
-public class ServerGuessedPicture implements GuessedPicture {
+public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
     private final CellState[][] field;
     private final int height;
@@ -9,7 +9,7 @@ public class ServerGuessedPicture implements GuessedPicture {
     private int amountOfSuccesses;
     private Runnable listenerOfComplete;
 
-    public ServerGuessedPicture(StashedPicture stashedPicture) {
+    public MultiPlayerGuessedPicture(StashedPicture stashedPicture) {
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
