@@ -53,7 +53,7 @@ public class MainForm {
         int height = DEFAULT_FIELD_SIZE.height;
         int width = DEFAULT_FIELD_SIZE.width;
         stashedField = StashedPicture.generate(height, width);
-        guessedPicture = new GuessedPicture(stashedField);
+        guessedPicture = new LocalGuessedPicture(stashedField);
         guessedPicture.setListenerOfComplete(this::complete);
         initializeLeftNumbers();
         initializeTopNumbers();
