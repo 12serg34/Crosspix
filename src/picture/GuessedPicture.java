@@ -1,18 +1,19 @@
 package picture;
 
 public class GuessedPicture {
-    private int width;
-    private int height;
-    private CellState[][] field;
+    private final StashedPicture stashedPicture;
+    private final CellState[][] field;
+    private final int height;
+    private final int width;
+
     private int amountOfSuccesses;
-    private int amountOfMistakes;
-    private StashedPicture stashedPicture;
+    private Runnable listener;
 
     public GuessedPicture(StashedPicture stashedPicture) {
-        this.height = stashedPicture.getHeight();
-        this.width = stashedPicture.getWidth();
         this.stashedPicture = stashedPicture;
-        this.field = new CellState[height][width];
+        height = stashedPicture.getHeight();
+        width = stashedPicture.getWidth();
+        field = new CellState[height][width];
         initializeField();
     }
 
@@ -24,20 +25,8 @@ public class GuessedPicture {
         }
     }
 
-    int getWidth() {
-        return width;
-    }
-
-    int getHeight() {
-        return height;
-    }
-
-    public int getAmountOfSuccesses() {
-        return amountOfSuccesses;
-    }
-
-    public CellState getCell(int i, int j) {
-        return field[i][j];
+    public void setListenerOfComplete(Runnable listener) {
+        this.listener = listener;
     }
 
     public Answer discoverRequest(int i, int j) {
@@ -47,10 +36,10 @@ public class GuessedPicture {
                 field[i][j] = CellState.FULL;
                 answer = Answer.SUCCESS;
                 amountOfSuccesses++;
+                checkOfComplete();
             } else {
                 field[i][j] = CellState.EMPTY;
                 answer = Answer.MISTAKE;
-                amountOfMistakes++;
             }
         }
         return answer;
@@ -65,5 +54,11 @@ public class GuessedPicture {
                 field[i][j] = CellState.BLANK;
         }
         return field[i][j];
+    }
+
+    private void checkOfComplete() {
+        if (stashedPicture.getAmountOfFullCells() == amountOfSuccesses) {
+            listener.run();
+        }
     }
 }

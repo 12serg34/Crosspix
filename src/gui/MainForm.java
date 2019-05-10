@@ -50,10 +50,11 @@ public class MainForm {
     }
 
     private void initialize() {
-        int width = DEFAULT_FIELD_SIZE.width;
         int height = DEFAULT_FIELD_SIZE.height;
+        int width = DEFAULT_FIELD_SIZE.width;
         stashedField = StashedPicture.generate(height, width);
         guessedPicture = new GuessedPicture(stashedField);
+        guessedPicture.setListenerOfComplete(this::complete);
         initializeLeftNumbers();
         initializeTopNumbers();
         initializeField(height, width);
@@ -131,10 +132,8 @@ public class MainForm {
         }
     }
 
-    private void tryToComplete(Answer answer) {
-        if (answer == Answer.SUCCESS && guessedPicture.getAmountOfSuccesses() == stashedField.getAmountOfFullCells()) {
-            System.out.println("Congratulations!!!");
-        }
+    private void complete() {
+        System.out.println("Congratulations!!!");
     }
 
     private class FormMouseAdapter extends MouseAdapter {
@@ -146,7 +145,6 @@ public class MainForm {
             if (e.getButton() == LEFT_MOUSE_BUTTON) {
                 Answer answer = guessedPicture.discoverRequest(point.y, point.x);
                 cellColor = answerToColor.get(answer);
-                tryToComplete(answer);
             } else if (e.getButton() == RIGHT_MOUSE_BUTTON) {
                 CellState cellState = guessedPicture.toggleEmpty(point.y, point.x);
                 cellColor = stateToColor.get(cellState);
