@@ -1,13 +1,21 @@
 package gui;
 
+import message.Message;
+import message.MessageHeader;
 import picture.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Random;
 
 public class MainForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
@@ -37,7 +45,7 @@ public class MainForm {
     private StashedPicture stashedField;
     private GuessedPicture guessedPicture;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         MainForm mainForm = new MainForm();
         mainForm.initialize();
 
@@ -47,6 +55,8 @@ public class MainForm {
         frame.setPreferredSize(PREFERRED_FORM_SIZE);
         frame.pack();
         frame.setVisible(true);
+
+        mainForm.connectToServer();
     }
 
     private void initialize() {
@@ -58,6 +68,40 @@ public class MainForm {
         initializeLeftNumbers();
         initializeTopNumbers();
         initializeField(height, width);
+    }
+
+    private void connectToServer() throws Exception {
+        System.out.println("Client started");
+        Socket socket = new Socket("localhost", 14500);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        new Thread(() -> {
+            try {
+                Message message = Message.EMPTY;
+                while (message.getHeader() != MessageHeader.STOP_SESSION) {
+                    System.out.println(message);
+                    message = Message.parse(reader.readLine());
+                }
+                System.out.println(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+        {
+            Message message = Message.START_GAME;
+            writer.write(message + "\n");
+            writer.flush();
+        }
+        Thread.sleep(3000);
+        writer.write(Message.STOP_SESSION + "\n");
+        writer.flush();
     }
 
     private void initializeField(int height, int width) {
