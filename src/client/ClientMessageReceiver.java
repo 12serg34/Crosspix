@@ -7,28 +7,32 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-public class ClientMessageReader implements Runnable {
+public class ClientMessageReceiver implements Runnable {
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
+
     private Socket socket;
-    private ClientMessageProcessor proccessor;
+    private ClientMessageProcessor processor;
     private BufferedReader reader;
 
-    private ClientMessageReader(Socket socket, ClientMessageProcessor processor) {
+    private ClientMessageReceiver(Socket socket, ClientMessageProcessor processor) {
         this.socket = socket;
-        this.proccessor = processor;
-        initializeReader();
+        this.processor = processor;
+        initialize();
     }
 
-    private void initializeReader() {
+    private void initialize() {
         try {
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static void start(Socket socket, ClientMessageProcessor processor) {
-        new Thread(new ClientMessageReader(socket, processor)).start();
+        new Thread(new ClientMessageReceiver(socket, processor)).start();
     }
 
     public void run() {
@@ -46,8 +50,8 @@ public class ClientMessageReader implements Runnable {
         System.out.println(message);
         while (message.getHeader() != MessageHeader.STOP_SESSION) {
             message = Message.parse(reader.readLine());
-            System.out.println(message);
-            proccessor.process(message);
+            System.out.println("Got - " + message);
+            processor.process(message);
         }
     }
 

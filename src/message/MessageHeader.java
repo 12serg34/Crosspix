@@ -3,8 +3,9 @@ package message;
 public enum MessageHeader {
     START_GAME,
     GAME_STARTED,
-    END_GAME,
-    FILL_CELL,
+    DISCOVER_CELL,
+    SUCCESS,
+    MISTAKE,
     STOP_SESSION,
     EMPTY,
 }

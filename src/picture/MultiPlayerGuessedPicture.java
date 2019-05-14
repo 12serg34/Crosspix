@@ -1,18 +1,39 @@
 package picture;
 
+import client.ClientMessageProcessor;
+import client.ClientMessageSender;
+import message.Message;
+import message.MessageHeader;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import static java.util.Arrays.asList;
+
 public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
     private final CellState[][] field;
     private final int height;
     private final int width;
+    private ClientMessageProcessor processor;
+    private ClientMessageSender sender;
 
     private int amountOfSuccesses;
-    private Runnable listenerOfComplete;
+    private Runnable completeListener;
+    private BiConsumer<Answer, Point> updatedCellListener;
 
-    public MultiPlayerGuessedPicture(StashedPicture stashedPicture) {
+    public MultiPlayerGuessedPicture(StashedPicture stashedPicture,
+                                     ClientMessageSender sender,
+                                     ClientMessageProcessor processor) {
+        this.sender = sender;
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
+        this.processor = processor;
+        processor.setCellUpdatedListener(this::cellUpdated);
         field = new CellState[height][width];
         initializeField();
     }
@@ -25,24 +46,16 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
         }
     }
 
-    public void setListenerOfComplete(Runnable listener) {
-        listenerOfComplete = listener;
+    public void setCompleteListener(Runnable listener) {
+        completeListener = listener;
     }
 
     public Answer discoverRequest(int i, int j) {
-        Answer answer = Answer.NOTHING;
         if (field[i][j] == CellState.BLANK) {
-            if (stashedPicture.getCell(i, j)) {
-                field[i][j] = CellState.FULL;
-                answer = Answer.SUCCESS;
-                amountOfSuccesses++;
-                tryOfComplete();
-            } else {
-                field[i][j] = CellState.EMPTY;
-                answer = Answer.MISTAKE;
-            }
+            sender.send(new Message(MessageHeader.DISCOVER_CELL, asList(i, j)));
+            return Answer.WAIT;
         }
-        return answer;
+        return Answer.NOTHING;
     }
 
     public CellState toggleEmpty(int i, int j) {
@@ -58,7 +71,30 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     private void tryOfComplete() {
         if (stashedPicture.getAmountOfFullCells() == amountOfSuccesses) {
-            listenerOfComplete.run();
+            completeListener.run();
         }
+    }
+
+    private void cellUpdated(Message message) {
+        List<Integer> arguments = message.getArguments();
+        int i = arguments.get(0);
+        int j = arguments.get(1);
+        Answer answer = null;
+        switch (message.getHeader()) {
+            case SUCCESS:
+                field[i][j] = CellState.FULL;
+                answer = Answer.SUCCESS;
+                amountOfSuccesses++;
+                break;
+            case MISTAKE:
+                field[i][j] = CellState.EMPTY;
+                answer = Answer.MISTAKE;
+                break;
+        }
+        updatedCellListener.accept(answer, new Point(j, i));
+    }
+
+    public void setUpdatedCellListener(BiConsumer<Answer, Point> updatedCellListener) {
+        this.updatedCellListener = updatedCellListener;
     }
 }

@@ -13,8 +13,12 @@ public class GamesPool {
         return game;
     }
 
-    boolean hasGame(Game game) {
-        return pool.containsKey(game.getId());
+    public boolean hasGame() {
+        return lastId == 0;
+    }
+
+    public Game getExistGame() {
+        return pool.get(0);
     }
 
     private synchronized int getNextId() {

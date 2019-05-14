@@ -34,7 +34,7 @@ public class StashedPicture {
         return height;
     }
 
-    boolean getCell(int i, int j) {
+    public boolean getCell(int i, int j) {
         return picture[i][j];
     }
 

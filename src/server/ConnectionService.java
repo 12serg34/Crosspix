@@ -3,7 +3,6 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 public class ConnectionService implements Runnable {
     private final ServerSocket serverSocket;
@@ -17,9 +16,10 @@ public class ConnectionService implements Runnable {
     public void run() {
         while (true) {
             try {
-                Socket accept = serverSocket.accept();
-                System.out.println("Accepted connection from: " + accept.getRemoteSocketAddress());
-                new Thread(new MessageService(accept, gamesPool)).start();
+                Socket socket = serverSocket.accept();
+                System.out.println("Accepted connection from: " + socket.getRemoteSocketAddress());
+                ServerMessageProcessor processor = new ServerMessageProcessor(gamesPool);
+                MessageService.start(socket, processor);
             } catch (IOException e) {
                 e.printStackTrace();
             }

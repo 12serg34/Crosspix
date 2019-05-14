@@ -1,18 +1,22 @@
 package picture;
 
-public class LocalGuessedPicture implements GuessedPicture {
+import server.Game;
+
+public class ServerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
     private final CellState[][] field;
     private final int height;
     private final int width;
+    private Game game;
 
-    private int amountOfSuccesses;
+    private int amountOfDiscoveredCells;
     private Runnable listenerOfComplete;
 
-    public LocalGuessedPicture(StashedPicture stashedPicture) {
+    public ServerGuessedPicture(StashedPicture stashedPicture, Game game) {
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
+        this.game = game;
         field = new CellState[height][width];
         initializeField();
     }
@@ -33,7 +37,7 @@ public class LocalGuessedPicture implements GuessedPicture {
         if (field[i][j] == CellState.BLANK) {
             if (stashedPicture.getCell(i, j)) {
                 field[i][j] = CellState.FULL;
-                amountOfSuccesses++;
+                amountOfDiscoveredCells++;
                 tryOfComplete();
                 return Answer.SUCCESS;
             } else {
@@ -56,8 +60,10 @@ public class LocalGuessedPicture implements GuessedPicture {
     }
 
     private void tryOfComplete() {
-        if (stashedPicture.getAmountOfFullCells() == amountOfSuccesses) {
-            listenerOfComplete.run();
+        if (stashedPicture.getAmountOfFullCells() == amountOfDiscoveredCells) {
+            if (listenerOfComplete != null) {
+                listenerOfComplete.run();
+            }
         }
     }
 }

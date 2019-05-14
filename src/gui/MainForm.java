@@ -1,17 +1,15 @@
 package gui;
 
 import client.ClientMessageProcessor;
-import client.ClientMessageReader;
+import client.ClientMessageReceiver;
+import client.ClientMessageSender;
 import message.Message;
 import picture.*;
 
-import javax.jws.soap.SOAPBinding;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -32,7 +30,8 @@ public class MainForm {
 
         answerToColor = new EnumMap<>(Answer.class);
         answerToColor.put(Answer.SUCCESS, Color.BLACK);
-        answerToColor.put(Answer.MISTAKE, Color.GRAY);
+        answerToColor.put(Answer.MISTAKE, Color.RED);
+        answerToColor.put(Answer.WAIT, Color.BLUE);
     }
 
     private JPanel mainPanel;
@@ -40,12 +39,14 @@ public class MainForm {
     private JPanel leftNumbersPanel;
     private JPanel topNumbersPanel;
 
+    private JPanel[][] cells;
     private HashMap<JPanel, Point> cellToPoint;
     private StashedPicture stashedField;
-    private GuessedPicture guessedPicture;
-    private OutputStreamWriter writer;
+    private MultiPlayerGuessedPicture guessedPicture;
     private int height;
     private int width;
+    private ClientMessageSender sender;
+    private ClientMessageProcessor processor;
 
     public static void main(String[] args) throws Exception {
         MainForm mainForm = new MainForm();
@@ -64,46 +65,45 @@ public class MainForm {
     private void connectToServer() throws Exception {
         System.out.println("Client started");
 
-        ClientMessageProcessor processor = new ClientMessageProcessor();
-        processor.setCreateGameListener(this::setStashedField);
+        processor = new ClientMessageProcessor();
+        processor.setStartedGameListener(this::startedGameListener);
 
         Socket socket = new Socket("localhost", 14500);
-        ClientMessageReader.start(socket, processor);
+        ClientMessageReceiver.start(socket, processor);
 
-        writer = new OutputStreamWriter(socket.getOutputStream());
-        {
-            Message message = Message.START_GAME;
-            writer.write(message + "\n");
-            writer.flush();
-            System.out.println("Sent " + message);
-        }
-        Thread.sleep(3000);
+        sender = new ClientMessageSender(socket);
+        sender.send(Message.START_GAME);
+        Thread.sleep(200);
     }
 
     private void initialize() {
 //        height = DEFAULT_FIELD_SIZE.height;
 //        width = DEFAULT_FIELD_SIZE.width;
 //        stashedField = StashedPicture.generate(height, width);
-        guessedPicture = new LocalGuessedPicture(stashedField);
-        guessedPicture.setListenerOfComplete(this::complete);
+//        guessedPicture = new LocalGuessedPicture(stashedField);
+        guessedPicture = new MultiPlayerGuessedPicture(stashedField, sender, processor);
+        guessedPicture.setCompleteListener(this::complete);
+        guessedPicture.setUpdatedCellListener(this::cellUpdatedListener);
         initializeLeftNumbers();
         initializeTopNumbers();
         initializeField();
     }
 
     private void initializeField() {
+        cells = new JPanel[height][width];
         cellToPoint = new HashMap<>(height * width);
         fieldPanel.setLayout(new GridLayout(height, width));
         MouseListener mouseAdapter = new FormMouseAdapter();
         Border lineBorder = BorderFactory.createLineBorder(Color.YELLOW);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                JPanel panel = new JPanel();
-                panel.addMouseListener(mouseAdapter);
-                panel.setBackground(Color.WHITE);
-                panel.setBorder(lineBorder);
-                cellToPoint.put(panel, new Point(j, i));
-                fieldPanel.add(panel);
+                JPanel cell = new JPanel();
+                cell.addMouseListener(mouseAdapter);
+                cell.setBackground(Color.WHITE);
+                cell.setBorder(lineBorder);
+                cells[i][j] = cell;
+                cellToPoint.put(cell, new Point(j, i));
+                fieldPanel.add(cell);
             }
         }
     }
@@ -167,10 +167,15 @@ public class MainForm {
         System.out.println("Congratulations!!!");
     }
 
-    private void setStashedField(StashedPicture stashedPicture) {
+    private void startedGameListener(Message message) {
+        StashedPicture stashedPicture = StashedPicture.parse(message);
         stashedField = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
+    }
+
+    private void cellUpdatedListener(Answer answer, Point point) {
+        cells[point.y][point.x].setBackground(answerToColor.get(answer));
     }
 
     private class FormMouseAdapter extends MouseAdapter {
@@ -193,16 +198,10 @@ public class MainForm {
     }
 
     private class FrameWindowListener extends WindowAdapter {
+
         @Override
-        public void windowClosed(WindowEvent e) {
-            try {
-                Message stopSession = Message.STOP_SESSION;
-                writer.write(stopSession + "\n");
-                writer.flush();
-                System.out.println("Sent " + stopSession);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+        public void windowClosing(WindowEvent e) {
+            sender.send(Message.STOP_SESSION);
         }
     }
 }

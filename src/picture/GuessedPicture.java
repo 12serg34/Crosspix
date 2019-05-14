@@ -2,7 +2,7 @@ package picture;
 
 public interface GuessedPicture {
 
-    void setListenerOfComplete(Runnable listener);
+    void setCompleteListener(Runnable listener);
 
     Answer discoverRequest(int i, int j);
 
