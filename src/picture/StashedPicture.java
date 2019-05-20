@@ -54,7 +54,7 @@ public class StashedPicture {
         return builder.toString();
     }
 
-    public List<Integer> toRaw() {
+    public List<Integer> encode() {
         ArrayList<Integer> result = new ArrayList<>(SIZE_SHIFT + height * width);
         result.add(height);
         result.add(width);
@@ -66,7 +66,7 @@ public class StashedPicture {
         return result;
     }
 
-    public static StashedPicture parse(Message message) {
+    public static StashedPicture decode(Message message) {
         StashedPicture result = new StashedPicture();
         List<Integer> arguments = message.getArguments();
         result.height = arguments.get(0);

@@ -2,16 +2,12 @@ package picture;
 
 import client.ClientMessageProcessor;
 import client.ClientMessageSender;
-import message.Message;
-import message.MessageHeader;
+import message.request.DiscoverCellRequest;
+import message.response.MistakeResponse;
+import message.response.SuccessResponse;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
-import static java.util.Arrays.asList;
 
 public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
@@ -33,7 +29,8 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
         this.processor = processor;
-        processor.setCellUpdatedListener(this::cellUpdated);
+        processor.setSuccessMessageListener(this::successReceived);
+        processor.setMistakeMessageListener(this::mistakeReceived);
         field = new CellState[height][width];
         initializeField();
     }
@@ -52,7 +49,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     public Answer discoverRequest(int i, int j) {
         if (field[i][j] == CellState.BLANK) {
-            sender.send(new Message(MessageHeader.DISCOVER_CELL, asList(i, j)));
+            sender.send(DiscoverCellRequest.encode(i, j));
             return Answer.WAIT;
         }
         return Answer.NOTHING;
@@ -75,23 +72,19 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
         }
     }
 
-    private void cellUpdated(Message message) {
-        List<Integer> arguments = message.getArguments();
-        int i = arguments.get(0);
-        int j = arguments.get(1);
-        Answer answer = null;
-        switch (message.getHeader()) {
-            case SUCCESS:
-                field[i][j] = CellState.FULL;
-                answer = Answer.SUCCESS;
-                amountOfSuccesses++;
-                break;
-            case MISTAKE:
-                field[i][j] = CellState.EMPTY;
-                answer = Answer.MISTAKE;
-                break;
-        }
-        updatedCellListener.accept(answer, new Point(j, i));
+    private void successReceived(SuccessResponse message) {
+        int i = message.getI();
+        int j = message.getJ();
+        field[i][j] = CellState.FULL;
+        amountOfSuccesses++;
+        updatedCellListener.accept(Answer.SUCCESS, new Point(j, i));
+    }
+
+    private void mistakeReceived(MistakeResponse message) {
+        int i = message.getI();
+        int j = message.getJ();
+        field[i][j] = CellState.EMPTY;
+        updatedCellListener.accept(Answer.MISTAKE, new Point(j, i));
     }
 
     public void setUpdatedCellListener(BiConsumer<Answer, Point> updatedCellListener) {

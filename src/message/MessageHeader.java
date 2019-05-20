@@ -1,8 +1,8 @@
 package message;
 
 public enum MessageHeader {
-    START_GAME,
-    GAME_STARTED,
+    CREATE_GAME,
+    GAME_CREATED,
     DISCOVER_CELL,
     SUCCESS,
     MISTAKE,

@@ -1,30 +1,40 @@
 package client;
 
+import message.response.GameCreatedResponse;
 import message.Message;
+import message.response.MistakeResponse;
+import message.response.SuccessResponse;
 
 import java.util.function.Consumer;
 
 public class ClientMessageProcessor {
-    private Consumer<Message> startedGameListener;
-    private Consumer<Message> cellUpdatedListener;
+    private Consumer<GameCreatedResponse> startedGameListener;
+    private Consumer<SuccessResponse> successMessageListener;
+    private Consumer<MistakeResponse> mistakeMessageListener;
 
     void process(Message message) {
         switch (message.getHeader()) {
-            case GAME_STARTED:
-                startedGameListener.accept(message);
+            case GAME_CREATED:
+                startedGameListener.accept(GameCreatedResponse.decode(message));
                 break;
             case SUCCESS:
+                successMessageListener.accept(SuccessResponse.decode(message));
+                break;
             case MISTAKE:
-                cellUpdatedListener.accept(message);
+                mistakeMessageListener.accept(MistakeResponse.decode(message));
                 break;
         }
     }
 
-    public void setStartedGameListener(Consumer<Message> listener) {
+    public void setStartedGameListener(Consumer<GameCreatedResponse> listener) {
         startedGameListener = listener;
     }
 
-    public void setCellUpdatedListener(Consumer<Message> cellUpdatedListener) {
-        this.cellUpdatedListener = cellUpdatedListener;
+    public void setSuccessMessageListener(Consumer<SuccessResponse> listener) {
+        successMessageListener = listener;
+    }
+
+    public void setMistakeMessageListener(Consumer<MistakeResponse> listener) {
+        mistakeMessageListener = listener;
     }
 }

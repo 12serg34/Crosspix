@@ -3,6 +3,7 @@ package gui;
 import client.ClientMessageProcessor;
 import client.ClientMessageReceiver;
 import client.ClientMessageSender;
+import message.response.GameCreatedResponse;
 import message.Message;
 import picture.*;
 
@@ -73,7 +74,7 @@ public class MainForm {
 
         sender = new ClientMessageSender(socket);
         sender.send(Message.START_GAME);
-        Thread.sleep(200);
+        Thread.sleep(5000);
     }
 
     private void initialize() {
@@ -167,8 +168,8 @@ public class MainForm {
         System.out.println("Congratulations!!!");
     }
 
-    private void startedGameListener(Message message) {
-        StashedPicture stashedPicture = StashedPicture.parse(message);
+    private void startedGameListener(GameCreatedResponse response) {
+        StashedPicture stashedPicture = response.getStashedPicture();
         stashedField = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();

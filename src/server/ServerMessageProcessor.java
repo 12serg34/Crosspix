@@ -1,10 +1,11 @@
 package server;
 
-import message.Message;
-import message.MessageHeader;
+import message.*;
+import message.request.DiscoverCellRequest;
+import message.response.GameCreatedResponse;
+import message.response.MistakeResponse;
+import message.response.SuccessResponse;
 import picture.Answer;
-
-import static java.util.Arrays.asList;
 
 public class ServerMessageProcessor {
     private MessageService service;
@@ -21,11 +22,11 @@ public class ServerMessageProcessor {
 
     void process(Message message) {
         switch (message.getHeader()) {
-            case START_GAME:
+            case CREATE_GAME:
                 createGame();
                 break;
             case DISCOVER_CELL:
-                discoverCell(message);
+                discoverCell(DiscoverCellRequest.decode(message));
                 break;
         }
     }
@@ -40,25 +41,24 @@ public class ServerMessageProcessor {
             game = gamesPool.getExistGame();
         }
         game.subscribeToUpdateCells(this::sendUpdates);
-        Message response = new Message(MessageHeader.GAME_STARTED, game.getStashedPicture().toRaw());
-        service.send(response);
+        service.send(GameCreatedResponse.encode(game.getStashedPicture()));
     }
 
-    private void discoverCell(Message request) {
-        int i = request.getArguments().get(0);
-        int j = request.getArguments().get(1);
+    private void discoverCell(DiscoverCellRequest request) {
+        int i = request.getI();
+        int j = request.getJ();
         Answer answer = game.getGuessedPicture().discoverRequest(i, j);
-        MessageHeader header = null;
+        Message message = null;
         switch (answer) {
             case SUCCESS:
-                header = MessageHeader.SUCCESS;
+                message = SuccessResponse.encode(i, j);
                 break;
             case MISTAKE:
-                header = MessageHeader.MISTAKE;
+                message = MistakeResponse.encode(i, j);
+                break;
         }
-        if (header != null) {
-            Message response = new Message(header, asList(i, j));
-            game.cellsUpdated(response);
+        if (message != null) {
+            game.cellsUpdated(message);
         }
     }
 
