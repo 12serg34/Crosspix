@@ -29,6 +29,16 @@ public class ServerGuessedPicture implements GuessedPicture {
         }
     }
 
+    @Override
+    public int getHeight() {
+        return height;
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
     public void setCompleteListener(Runnable listener) {
         listenerOfComplete = listener;
     }

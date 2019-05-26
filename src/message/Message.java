@@ -6,7 +6,7 @@ import static java.util.Collections.emptyList;
 
 public class Message {
     public static final Message EMPTY = new Message(MessageHeader.EMPTY, emptyList());
-    public static final Message START_GAME = new Message(MessageHeader.CREATE_GAME, emptyList());
+    public static final Message CREATE_GAME = new Message(MessageHeader.CREATE_GAME, emptyList());
     public static final Message STOP_SESSION = new Message(MessageHeader.STOP_SESSION, emptyList());
 
     private MessageHeader header;

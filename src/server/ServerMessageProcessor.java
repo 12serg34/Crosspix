@@ -22,6 +22,9 @@ public class ServerMessageProcessor {
 
     void process(Message message) {
         switch (message.getHeader()) {
+            case EMPTY:
+                service.send(Message.EMPTY);
+                break;
             case CREATE_GAME:
                 createGame();
                 break;

@@ -8,12 +8,16 @@ import message.response.SuccessResponse;
 import java.util.function.Consumer;
 
 public class ClientMessageProcessor {
+    private Runnable emptyMessageListener;
     private Consumer<GameCreatedResponse> startedGameListener;
     private Consumer<SuccessResponse> successMessageListener;
     private Consumer<MistakeResponse> mistakeMessageListener;
 
     void process(Message message) {
         switch (message.getHeader()) {
+            case EMPTY:
+                emptyMessageListener.run();
+                break;
             case GAME_CREATED:
                 startedGameListener.accept(GameCreatedResponse.decode(message));
                 break;
@@ -26,7 +30,7 @@ public class ClientMessageProcessor {
         }
     }
 
-    public void setStartedGameListener(Consumer<GameCreatedResponse> listener) {
+    public void setCreatedGameListener(Consumer<GameCreatedResponse> listener) {
         startedGameListener = listener;
     }
 
@@ -36,5 +40,9 @@ public class ClientMessageProcessor {
 
     public void setMistakeMessageListener(Consumer<MistakeResponse> listener) {
         mistakeMessageListener = listener;
+    }
+
+    public void setEmptyMessageListener(Runnable listener) {
+        emptyMessageListener = listener;
     }
 }

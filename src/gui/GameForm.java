@@ -1,9 +1,7 @@
 package gui;
 
 import client.ClientMessageProcessor;
-import client.ClientMessageReceiver;
 import client.ClientMessageSender;
-import message.response.GameCreatedResponse;
 import message.Message;
 import picture.*;
 
@@ -11,14 +9,12 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.Socket;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-public class MainForm {
+public class GameForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
     private static final Dimension PREFERRED_FORM_SIZE = new Dimension(800, 800);
-    private static final Dimension DEFAULT_FIELD_SIZE = new Dimension(5, 5);
     private static final int LEFT_MOUSE_BUTTON = MouseEvent.BUTTON1;
     private static final int RIGHT_MOUSE_BUTTON = MouseEvent.BUTTON3;
     private static final EnumMap<CellState, Color> stateToColor;
@@ -42,52 +38,33 @@ public class MainForm {
 
     private JPanel[][] cells;
     private HashMap<JPanel, Point> cellToPoint;
-    private StashedPicture stashedField;
-    private MultiPlayerGuessedPicture guessedPicture;
+    private GuessedPicture guessedPicture;
     private int height;
     private int width;
     private ClientMessageSender sender;
     private ClientMessageProcessor processor;
+    private Numbers leftNumbers;
+    private Numbers topNumbers;
 
-    public static void main(String[] args) throws Exception {
-        MainForm mainForm = new MainForm();
-        mainForm.connectToServer();
-        mainForm.initialize();
-
-        JFrame frame = new JFrame("MainForm");
-        frame.setContentPane(mainForm.mainPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(PREFERRED_FORM_SIZE);
-        frame.addWindowListener(mainForm.new FrameWindowListener());
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    private void connectToServer() throws Exception {
-        System.out.println("Client started");
-
-        processor = new ClientMessageProcessor();
-        processor.setStartedGameListener(this::startedGameListener);
-
-        Socket socket = new Socket("localhost", 14500);
-        ClientMessageReceiver.start(socket, processor);
-
-        sender = new ClientMessageSender(socket);
-        sender.send(Message.START_GAME);
-        Thread.sleep(5000);
-    }
-
-    private void initialize() {
-//        height = DEFAULT_FIELD_SIZE.height;
-//        width = DEFAULT_FIELD_SIZE.width;
-//        stashedField = StashedPicture.generate(height, width);
-//        guessedPicture = new LocalGuessedPicture(stashedField);
-        guessedPicture = new MultiPlayerGuessedPicture(stashedField, sender, processor);
+    GameForm(GuessedPicture picture, Numbers leftNumbers, Numbers topNumbers) {
+        guessedPicture = picture;
         guessedPicture.setCompleteListener(this::complete);
         guessedPicture.setUpdatedCellListener(this::cellUpdatedListener);
+        height = picture.getHeight();
+        width = picture.getWidth();
+        this.leftNumbers = leftNumbers;
+        this.topNumbers = topNumbers;
         initializeLeftNumbers();
         initializeTopNumbers();
         initializeField();
+
+        JFrame frame = new JFrame("MainForm");
+        frame.setContentPane(mainPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(PREFERRED_FORM_SIZE);
+        frame.addWindowListener(new FrameWindowListener());
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private void initializeField() {
@@ -110,7 +87,6 @@ public class MainForm {
     }
 
     private void initializeLeftNumbers() {
-        Numbers leftNumbers = new Numbers(stashedField, NumbersSide.LEFT);
         int size = leftNumbers.getSize();
         int depth = leftNumbers.getDepth();
         JPanel[][] grid = new JPanel[size][depth];
@@ -137,7 +113,6 @@ public class MainForm {
     }
 
     private void initializeTopNumbers() {
-        Numbers topNumbers = new Numbers(stashedField, NumbersSide.TOP);
         int size = topNumbers.getSize();
         int depth = topNumbers.getDepth();
         JPanel[][] grid = new JPanel[depth][size];
@@ -166,13 +141,6 @@ public class MainForm {
 
     private void complete() {
         System.out.println("Congratulations!!!");
-    }
-
-    private void startedGameListener(GameCreatedResponse response) {
-        StashedPicture stashedPicture = response.getStashedPicture();
-        stashedField = stashedPicture;
-        height = stashedPicture.getHeight();
-        width = stashedPicture.getWidth();
     }
 
     private void cellUpdatedListener(Answer answer, Point point) {
