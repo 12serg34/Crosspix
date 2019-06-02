@@ -12,10 +12,10 @@ public class ClientMessageReceiver implements Runnable {
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private Socket socket;
-    private ClientMessageProcessor processor;
+    private MessageProcessor processor;
     private ObjectInputStream reader;
 
-    private ClientMessageReceiver(Socket socket, ClientMessageProcessor processor) {
+    private ClientMessageReceiver(Socket socket, MessageProcessor processor) {
         this.socket = socket;
         this.processor = processor;
         initialize();
@@ -30,7 +30,7 @@ public class ClientMessageReceiver implements Runnable {
         }
     }
 
-    public static void start(Socket socket, ClientMessageProcessor processor) {
+    public static void start(Socket socket, MessageProcessor processor) {
         new Thread(new ClientMessageReceiver(socket, processor)).start();
     }
 

@@ -1,6 +1,6 @@
 package gui;
 
-import client.ClientMessageProcessor;
+import client.MessageProcessor;
 import client.ClientMessageReceiver;
 import client.ClientMessageSender;
 import message.Message;
@@ -27,7 +27,7 @@ public class MenuForm {
     private StashedPicture stashedPicture;
 
     MenuForm() {
-        ClientMessageProcessor processor = new ClientMessageProcessor();
+        MessageProcessor processor = new MessageProcessor();
         processor.setPongMessageListener(() -> {
             connectLabel.setText("connected");
 //            sender.send();
@@ -59,7 +59,7 @@ public class MenuForm {
         });
     }
 
-    private void createSenderAndStartReceiver(Socket socket, ClientMessageProcessor processor) {
+    private void createSenderAndStartReceiver(Socket socket, MessageProcessor processor) {
         sender = new ClientMessageSender(socket);
         ClientMessageReceiver.start(socket, processor);
     }

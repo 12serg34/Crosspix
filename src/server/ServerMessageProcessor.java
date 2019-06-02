@@ -34,7 +34,7 @@ public class ServerMessageProcessor {
                 createGame();
                 break;
             case DISCOVER_CELL:
-                discoverCell(DiscoverCellRequest.decode(message));
+                discoverCell((DiscoverCellRequest) message.getData());
                 break;
         }
     }
@@ -64,10 +64,10 @@ public class ServerMessageProcessor {
         Message message = null;
         switch (answer) {
             case SUCCESS:
-                message = SuccessResponse.encode(i, j);
+                message = SuccessResponse.pack(i, j);
                 break;
             case MISTAKE:
-                message = MistakeResponse.encode(i, j);
+                message = MistakeResponse.pack(i, j);
                 break;
         }
         if (message != null) {

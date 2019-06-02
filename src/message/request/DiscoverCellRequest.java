@@ -3,26 +3,21 @@ package message.request;
 import message.Message;
 import message.MessageHeader;
 
-import java.util.List;
+import java.io.Serializable;
 
-import static java.util.Arrays.asList;
+public final class DiscoverCellRequest implements Serializable {
+    private static final long serialVersionUID = 7199493256943566238L;
 
-public class DiscoverCellRequest {
-    int i;
-    int j;
+    private final int i;
+    private final int j;
 
-    public DiscoverCellRequest(int i, int j) {
+    private DiscoverCellRequest(int i, int j) {
         this.i = i;
         this.j = j;
     }
 
     public static Message encode(int i, int j) {
-        return new Message(MessageHeader.DISCOVER_CELL, asList(i, j));
-    }
-
-    public static DiscoverCellRequest decode(Message message) {
-        List<Integer> arguments = message.getArguments();
-        return new DiscoverCellRequest(arguments.get(0), arguments.get(1));
+        return new Message(MessageHeader.DISCOVER_CELL, new DiscoverCellRequest(i, j));
     }
 
     public int getI() {

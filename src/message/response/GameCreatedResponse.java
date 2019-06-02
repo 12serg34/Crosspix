@@ -4,19 +4,19 @@ import message.Message;
 import message.MessageHeader;
 import picture.StashedPicture;
 
-public class GameCreatedResponse {
+import java.io.Serializable;
+
+public final class GameCreatedResponse implements Serializable {
+    private static final long serialVersionUID = -5476441886572684946L;
+
     private final StashedPicture stashedPicture;
 
-    public GameCreatedResponse(StashedPicture stashedPicture) {
+    private GameCreatedResponse(StashedPicture stashedPicture) {
         this.stashedPicture = stashedPicture;
     }
 
     public static Message encode(StashedPicture picture) {
-        return new Message(MessageHeader.GAME_CREATED, picture.encode());
-    }
-
-    public static GameCreatedResponse decode(Message message) {
-        return new GameCreatedResponse(StashedPicture.decode(message));
+        return new Message(MessageHeader.GAME_CREATED, new GameCreatedResponse(picture));
     }
 
     public StashedPicture getStashedPicture() {

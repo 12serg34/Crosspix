@@ -5,27 +5,29 @@ import message.Message;
 import message.response.MistakeResponse;
 import message.response.SuccessResponse;
 
+import java.io.Serializable;
 import java.util.function.Consumer;
 
-public class ClientMessageProcessor {
+public class MessageProcessor {
     private Runnable pongMessageListener;
     private Consumer<GameCreatedResponse> startedGameListener;
     private Consumer<SuccessResponse> successMessageListener;
     private Consumer<MistakeResponse> mistakeMessageListener;
 
     void process(Message message) {
+        Serializable data = message.getData();
         switch (message.getHeader()) {
             case PONG:
                 pongMessageListener.run();
                 break;
             case GAME_CREATED:
-                startedGameListener.accept(GameCreatedResponse.decode(message));
+                startedGameListener.accept((GameCreatedResponse) data);
                 break;
             case SUCCESS:
-                successMessageListener.accept(SuccessResponse.decode(message));
+                successMessageListener.accept((SuccessResponse) data);
                 break;
             case MISTAKE:
-                mistakeMessageListener.accept(MistakeResponse.decode(message));
+                mistakeMessageListener.accept(((MistakeResponse) data));
                 break;
         }
     }

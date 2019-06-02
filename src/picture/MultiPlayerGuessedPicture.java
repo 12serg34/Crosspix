@@ -1,6 +1,6 @@
 package picture;
 
-import client.ClientMessageProcessor;
+import client.MessageProcessor;
 import client.ClientMessageSender;
 import message.request.DiscoverCellRequest;
 import message.response.MistakeResponse;
@@ -14,7 +14,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final CellState[][] field;
     private final int height;
     private final int width;
-    private ClientMessageProcessor processor;
+    private MessageProcessor processor;
     private ClientMessageSender sender;
 
     private int amountOfSuccesses;
@@ -23,7 +23,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     public MultiPlayerGuessedPicture(StashedPicture stashedPicture,
                                      ClientMessageSender sender,
-                                     ClientMessageProcessor processor) {
+                                     MessageProcessor processor) {
         this.sender = sender;
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();

@@ -1,14 +1,11 @@
 package picture;
 
-import message.Message;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 import java.util.Random;
 
-public class StashedPicture {
+public class StashedPicture implements Serializable {
+    private static final long serialVersionUID = 6046359270249856133L;
     private static final Random RANDOM = new Random();
-    private static final int SIZE_SHIFT = 2;
 
     private int height;
     private int width;
@@ -26,15 +23,15 @@ public class StashedPicture {
         countFullCells();
     }
 
-    public int getWidth() {
+    int getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    int getHeight() {
         return height;
     }
 
-    public boolean getCell(int i, int j) {
+    boolean getCell(int i, int j) {
         return picture[i][j];
     }
 
@@ -52,43 +49,6 @@ public class StashedPicture {
             }
         }
         return builder.toString();
-    }
-
-    public List<Integer> encode() {
-        ArrayList<Integer> result = new ArrayList<>(SIZE_SHIFT + height * width);
-        result.add(height);
-        result.add(width);
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                result.add(cellToInt(picture[i][j]));
-            }
-        }
-        return result;
-    }
-
-    public static StashedPicture decode(Message message) {
-        StashedPicture result = new StashedPicture();
-        List<Integer> arguments = message.getArguments();
-        result.height = arguments.get(0);
-        result.width = arguments.get(1);
-        result.picture = new boolean[result.height][result.width];
-        for (int i = 0; i < result.height; i++) {
-            for (int j = 0; j < result.width; j++) {
-                if (intToCell(arguments.get(SIZE_SHIFT + i * result.width + j))) {
-                    result.picture[i][j] = true;
-                    result.amountOfFullCells++;
-                }
-            }
-        }
-        return result;
-    }
-
-    private int cellToInt(boolean cell) {
-        return cell ? 1 : 0;
-    }
-
-    private static boolean intToCell(int value) {
-        return value == 1;
     }
 
     public static StashedPicture generate(int height, int width) {
