@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class Game {
-    private final int id;
+    private GameInfo info;
     private StashedPicture stashedPicture;
     private ServerGuessedPicture guessedPicture;
     private final List<Consumer<Message>> listeners;
 
-    Game(int id) {
-        this.id = id;
+    Game(GameInfo info) {
+        this.info = info;
         listeners = new ArrayList<>(3);
     }
 
@@ -24,8 +24,8 @@ public class Game {
         guessedPicture = new ServerGuessedPicture(stashedPicture, this);
     }
 
-    Integer getId() {
-        return id;
+    GameInfo getInfo() {
+        return info;
     }
     
     ServerGuessedPicture getGuessedPicture() {
@@ -36,11 +36,11 @@ public class Game {
         return stashedPicture;
     }
 
-    public void subscribeToUpdateCells(Consumer<Message> listener) {
+    void subscribeToUpdateCells(Consumer<Message> listener) {
         listeners.add(listener);
     }
 
-    public void cellsUpdated(Message message) {
+    void cellsUpdated(Message message) {
         listeners.forEach(x -> x.accept(message));
     }
 }

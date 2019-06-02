@@ -59,7 +59,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     public Answer discoverRequest(int i, int j) {
         if (field[i][j] == CellState.BLANK) {
-            sender.send(DiscoverCellRequest.encode(i, j));
+            sender.send(DiscoverCellRequest.pack(i, j));
             return Answer.WAIT;
         }
         return Answer.NOTHING;

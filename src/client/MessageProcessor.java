@@ -1,7 +1,8 @@
 package client;
 
-import message.response.GameCreatedResponse;
 import message.Message;
+import message.response.GameCreatedResponse;
+import message.response.GamesInfoResponse;
 import message.response.MistakeResponse;
 import message.response.SuccessResponse;
 
@@ -10,6 +11,7 @@ import java.util.function.Consumer;
 
 public class MessageProcessor {
     private Runnable pongMessageListener;
+    private Consumer<GamesInfoResponse> gamesInfoListener;
     private Consumer<GameCreatedResponse> startedGameListener;
     private Consumer<SuccessResponse> successMessageListener;
     private Consumer<MistakeResponse> mistakeMessageListener;
@@ -19,6 +21,9 @@ public class MessageProcessor {
         switch (message.getHeader()) {
             case PONG:
                 pongMessageListener.run();
+                break;
+            case GAMES_INFO:
+                gamesInfoListener.accept((GamesInfoResponse) data);
                 break;
             case GAME_CREATED:
                 startedGameListener.accept((GameCreatedResponse) data);
@@ -46,5 +51,9 @@ public class MessageProcessor {
 
     public void setPongMessageListener(Runnable listener) {
         pongMessageListener = listener;
+    }
+
+    public void setGamesInfoListener(Consumer<GamesInfoResponse> listener) {
+        gamesInfoListener = listener;
     }
 }

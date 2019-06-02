@@ -4,6 +4,7 @@ import client.MessageProcessor;
 import client.ClientMessageReceiver;
 import client.ClientMessageSender;
 import message.Message;
+import message.request.CreateGameRequest;
 import picture.*;
 
 import javax.swing.*;
@@ -23,6 +24,8 @@ public class MenuForm {
     private JLabel createGameLabel;
     private JButton startButton;
     private JList gamesList;
+    private JTextField gameNameTextField;
+    private JButton refreshGamesListButton;
     private ClientMessageSender sender;
     private StashedPicture stashedPicture;
 
@@ -30,13 +33,14 @@ public class MenuForm {
         MessageProcessor processor = new MessageProcessor();
         processor.setPongMessageListener(() -> {
             connectLabel.setText("connected");
-//            sender.send();
+            sender.send(Message.GET_GAMES_INFO);
         });
         processor.setCreatedGameListener(response -> {
             stashedPicture = response.getStashedPicture();
             createGameLabel.setText("game created "
                     + stashedPicture);
         });
+        processor.setGamesInfoListener(response -> gamesList.setListData(response.getGamesInfo().toArray()));
 
         connectButton.addActionListener(e -> {
             Socket socket = null;
@@ -48,9 +52,12 @@ public class MenuForm {
             createSenderAndStartReceiver(socket, processor);
             sender.send(Message.PING);
         });
+        refreshGamesListButton.addActionListener(e -> {
+            sender.send(Message.GET_GAMES_INFO);
+        });
         createGameButton.addActionListener(e -> {
             System.out.println("Creating game");
-            sender.send(Message.CREATE_GAME);
+            sender.send(CreateGameRequest.pack(gameNameTextField.getText()));
         });
         startButton.addActionListener(e -> {
             GuessedPicture picture = new MultiPlayerGuessedPicture(stashedPicture, sender, processor);

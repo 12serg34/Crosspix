@@ -1,7 +1,6 @@
 package message;
 
 import java.io.Serializable;
-import java.util.*;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 5034602183071924396L;
@@ -9,8 +8,7 @@ public class Message implements Serializable {
     public static final Message EMPTY = new Message(MessageHeader.EMPTY, null);
     public static final Message PING = new Message(MessageHeader.PING, null);
     public static final Message PONG = new Message(MessageHeader.PONG, null);
-    public static final Message GET_GAMES_LIST = new Message(MessageHeader.GET_GAMES_LIST, null);
-    public static final Message CREATE_GAME = new Message(MessageHeader.CREATE_GAME, null);
+    public static final Message GET_GAMES_INFO = new Message(MessageHeader.GET_GAMES_INFO, null);
     public static final Message STOP_SESSION = new Message(MessageHeader.STOP_SESSION, null);
 
     private MessageHeader header;

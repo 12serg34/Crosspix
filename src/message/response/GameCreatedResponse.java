@@ -15,7 +15,7 @@ public final class GameCreatedResponse implements Serializable {
         this.stashedPicture = stashedPicture;
     }
 
-    public static Message encode(StashedPicture picture) {
+    public static Message pack(StashedPicture picture) {
         return new Message(MessageHeader.GAME_CREATED, new GameCreatedResponse(picture));
     }
 

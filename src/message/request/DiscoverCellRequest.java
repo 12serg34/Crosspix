@@ -16,7 +16,7 @@ public final class DiscoverCellRequest implements Serializable {
         this.j = j;
     }
 
-    public static Message encode(int i, int j) {
+    public static Message pack(int i, int j) {
         return new Message(MessageHeader.DISCOVER_CELL, new DiscoverCellRequest(i, j));
     }
 

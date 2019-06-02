@@ -1,13 +1,13 @@
 package server;
 
 import message.*;
+import message.request.CreateGameRequest;
 import message.request.DiscoverCellRequest;
 import message.response.GameCreatedResponse;
+import message.response.GamesInfoResponse;
 import message.response.MistakeResponse;
 import message.response.SuccessResponse;
 import picture.Answer;
-
-import java.util.Collection;
 
 public class ServerMessageProcessor {
     private MessageService service;
@@ -27,11 +27,11 @@ public class ServerMessageProcessor {
             case PING:
                 service.send(Message.PONG);
                 break;
-            case GET_GAMES_LIST:
-                getGamesList();
+            case GET_GAMES_INFO:
+                getGamesInfo();
                 break;
             case CREATE_GAME:
-                createGame();
+                createGame((CreateGameRequest) message.getData());
                 break;
             case DISCOVER_CELL:
                 discoverCell((DiscoverCellRequest) message.getData());
@@ -39,22 +39,17 @@ public class ServerMessageProcessor {
         }
     }
 
-    private void getGamesList() {
-        Collection<Game> gamesList = gamesPool.getGamesList();
-        gamesList.stream();
+    private void getGamesInfo() {
+        service.send(GamesInfoResponse.pack(gamesPool.getGamesInfo()));
     }
 
-    private void createGame() {
-        if (gamesPool.isEmpty()) {
-            game = gamesPool.createGame();
-            int height = 5;
-            int width = 5;
-            game.initialize(height, width);
-        } else {
-            game = gamesPool.getExistGame();
-        }
+    private void createGame(CreateGameRequest request) {
+        game = gamesPool.putNewGame(request.getName());
+        int height = 5;
+        int width = 5;
+        game.initialize(height, width);
         game.subscribeToUpdateCells(this::sendUpdates);
-        service.send(GameCreatedResponse.encode(game.getStashedPicture()));
+        service.send(GameCreatedResponse.pack(game.getStashedPicture()));
     }
 
     private void discoverCell(DiscoverCellRequest request) {

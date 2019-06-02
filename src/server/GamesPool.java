@@ -1,31 +1,24 @@
 package server;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class GamesPool {
+class GamesPool {
     private final HashMap<Integer, Game> pool = new HashMap<>(4);
     private int size;
 
-    Game createGame() {
+    Game putNewGame(String name) {
         int id = getNextId();
-        Game game = new Game(id);
+        Game game = new Game(new GameInfo(id, name));
         pool.put(id, game);
         return game;
     }
 
-    boolean isEmpty() {
-        return size == 0;
-    }
-
-    public Game getExistGame() {
-        return pool.get(0);
-    }
-
-    Collection<Game> getGamesList() {
-        return Collections.unmodifiableCollection(pool.values());
+    List<GameInfo> getGamesInfo() {
+        return pool.values().stream()
+                .map(Game::getInfo)
+                .collect(Collectors.toList());
     }
 
     private synchronized int getNextId() {
