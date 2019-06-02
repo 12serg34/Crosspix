@@ -3,10 +3,7 @@ package server;
 import message.Message;
 import message.MessageHeader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +13,8 @@ public class MessageService implements Runnable {
 
     private final Socket socket;
     private ServerMessageProcessor processor;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private ObjectInputStream reader;
+    private ObjectOutputStream writer;
 
     MessageService(Socket socket, ServerMessageProcessor processor) {
         this.socket = socket;
@@ -39,7 +36,7 @@ public class MessageService implements Runnable {
                 processor.process(message);
                 message = waitNextMessage();
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             closeSession();
@@ -47,19 +44,19 @@ public class MessageService implements Runnable {
     }
 
     private void initialize() throws IOException {
-        reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
-        writer = new OutputStreamWriter(socket.getOutputStream(), CHARSET);
+        writer = new ObjectOutputStream(socket.getOutputStream());
+        reader = new ObjectInputStream(socket.getInputStream());
     }
 
-    private Message waitNextMessage() throws IOException {
-        Message message = Message.parse(reader.readLine());
+    private Message waitNextMessage() throws IOException, ClassNotFoundException {
+        Message message = (Message) reader.readObject();
         System.out.println("Got - " + message);
         return message;
     }
 
     void send(Message message) {
         try {
-            writer.write(message + "\n");
+            writer.writeObject(message);
             writer.flush();
             System.out.println("Sent - " + message);
         } catch (IOException e) {

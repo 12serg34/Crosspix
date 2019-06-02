@@ -8,15 +8,15 @@ import message.response.SuccessResponse;
 import java.util.function.Consumer;
 
 public class ClientMessageProcessor {
-    private Runnable emptyMessageListener;
+    private Runnable pongMessageListener;
     private Consumer<GameCreatedResponse> startedGameListener;
     private Consumer<SuccessResponse> successMessageListener;
     private Consumer<MistakeResponse> mistakeMessageListener;
 
     void process(Message message) {
         switch (message.getHeader()) {
-            case EMPTY:
-                emptyMessageListener.run();
+            case PONG:
+                pongMessageListener.run();
                 break;
             case GAME_CREATED:
                 startedGameListener.accept(GameCreatedResponse.decode(message));
@@ -42,7 +42,7 @@ public class ClientMessageProcessor {
         mistakeMessageListener = listener;
     }
 
-    public void setEmptyMessageListener(Runnable listener) {
-        emptyMessageListener = listener;
+    public void setPongMessageListener(Runnable listener) {
+        pongMessageListener = listener;
     }
 }

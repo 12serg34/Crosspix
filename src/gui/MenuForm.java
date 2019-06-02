@@ -22,13 +22,15 @@ public class MenuForm {
     private JButton createGameButton;
     private JLabel createGameLabel;
     private JButton startButton;
+    private JList gamesList;
     private ClientMessageSender sender;
     private StashedPicture stashedPicture;
 
     MenuForm() {
         ClientMessageProcessor processor = new ClientMessageProcessor();
-        processor.setEmptyMessageListener(() -> {
+        processor.setPongMessageListener(() -> {
             connectLabel.setText("connected");
+//            sender.send();
         });
         processor.setCreatedGameListener(response -> {
             stashedPicture = response.getStashedPicture();
@@ -43,10 +45,8 @@ public class MenuForm {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
-            ClientMessageReceiver.start(socket, processor);
-
-            sender = new ClientMessageSender(socket);
-            sender.send(Message.EMPTY);
+            createSenderAndStartReceiver(socket, processor);
+            sender.send(Message.PING);
         });
         createGameButton.addActionListener(e -> {
             System.out.println("Creating game");
@@ -57,6 +57,11 @@ public class MenuForm {
             GameForm gameForm = new GameForm(picture, new Numbers(stashedPicture, NumbersSide.LEFT),
                     new Numbers(stashedPicture, NumbersSide.TOP));
         });
+    }
+
+    private void createSenderAndStartReceiver(Socket socket, ClientMessageProcessor processor) {
+        sender = new ClientMessageSender(socket);
+        ClientMessageReceiver.start(socket, processor);
     }
 
     public static void main(String[] args) throws Exception {

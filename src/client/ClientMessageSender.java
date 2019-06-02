@@ -3,6 +3,7 @@ package client;
 import message.Message;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
@@ -12,7 +13,7 @@ public class ClientMessageSender {
     private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private Socket socket;
-    private OutputStreamWriter writer;
+    private ObjectOutputStream writer;
 
     public ClientMessageSender(Socket socket) {
         this.socket = socket;
@@ -21,7 +22,7 @@ public class ClientMessageSender {
 
     private void initialize() {
         try {
-            writer = new OutputStreamWriter(socket.getOutputStream(), CHARSET);
+            writer = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -29,7 +30,7 @@ public class ClientMessageSender {
 
     public void send(Message message) {
         try {
-            writer.write(message + "\n");
+            writer.writeObject(message);
             writer.flush();
             System.out.println("Sent - " + message);
         } catch (Exception e) {

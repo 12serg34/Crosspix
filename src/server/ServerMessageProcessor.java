@@ -7,6 +7,8 @@ import message.response.MistakeResponse;
 import message.response.SuccessResponse;
 import picture.Answer;
 
+import java.util.Collection;
+
 public class ServerMessageProcessor {
     private MessageService service;
     private Game game;
@@ -22,8 +24,11 @@ public class ServerMessageProcessor {
 
     void process(Message message) {
         switch (message.getHeader()) {
-            case EMPTY:
-                service.send(Message.EMPTY);
+            case PING:
+                service.send(Message.PONG);
+                break;
+            case GET_GAMES_LIST:
+                getGamesList();
                 break;
             case CREATE_GAME:
                 createGame();
@@ -34,8 +39,13 @@ public class ServerMessageProcessor {
         }
     }
 
+    private void getGamesList() {
+        Collection<Game> gamesList = gamesPool.getGamesList();
+        gamesList.stream();
+    }
+
     private void createGame() {
-        if (!gamesPool.hasGame()) {
+        if (gamesPool.isEmpty()) {
             game = gamesPool.createGame();
             int height = 5;
             int width = 5;

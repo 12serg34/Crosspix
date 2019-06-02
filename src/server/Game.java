@@ -27,7 +27,7 @@ public class Game {
     Integer getId() {
         return id;
     }
-
+    
     ServerGuessedPicture getGuessedPicture() {
         return guessedPicture;
     }

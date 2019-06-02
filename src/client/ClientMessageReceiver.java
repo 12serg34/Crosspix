@@ -3,9 +3,7 @@ package client;
 import message.Message;
 import message.MessageHeader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +13,7 @@ public class ClientMessageReceiver implements Runnable {
 
     private Socket socket;
     private ClientMessageProcessor processor;
-    private BufferedReader reader;
+    private ObjectInputStream reader;
 
     private ClientMessageReceiver(Socket socket, ClientMessageProcessor processor) {
         this.socket = socket;
@@ -25,7 +23,8 @@ public class ClientMessageReceiver implements Runnable {
 
     private void initialize() {
         try {
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET));
+            InputStream inputStream = socket.getInputStream();
+            reader = new ObjectInputStream(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,18 +37,18 @@ public class ClientMessageReceiver implements Runnable {
     public void run() {
         try {
             runImpl();
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             close();
         }
     }
 
-    private void runImpl() throws IOException {
+    private void runImpl() throws IOException, ClassNotFoundException {
         Message message = Message.EMPTY;
         System.out.println(message);
         while (message.getHeader() != MessageHeader.STOP_SESSION) {
-            message = Message.parse(reader.readLine());
+            message = (Message) reader.readObject();
             System.out.println("Got - " + message);
             processor.process(message);
         }

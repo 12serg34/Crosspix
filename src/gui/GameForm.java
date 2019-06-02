@@ -1,14 +1,16 @@
 package gui;
 
-import client.ClientMessageProcessor;
-import client.ClientMessageSender;
-import message.Message;
-import picture.*;
+import picture.Answer;
+import picture.CellState;
+import picture.GuessedPicture;
+import picture.Numbers;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.EnumMap;
 import java.util.HashMap;
 
@@ -36,20 +38,18 @@ public class GameForm {
     private JPanel leftNumbersPanel;
     private JPanel topNumbersPanel;
 
+    private final GuessedPicture guessedPicture;
+    private final int height;
+    private final int width;
+    private final Numbers leftNumbers;
+    private final Numbers topNumbers;
     private JPanel[][] cells;
     private HashMap<JPanel, Point> cellToPoint;
-    private GuessedPicture guessedPicture;
-    private int height;
-    private int width;
-    private ClientMessageSender sender;
-    private ClientMessageProcessor processor;
-    private Numbers leftNumbers;
-    private Numbers topNumbers;
 
     GameForm(GuessedPicture picture, Numbers leftNumbers, Numbers topNumbers) {
         guessedPicture = picture;
         guessedPicture.setCompleteListener(this::complete);
-        guessedPicture.setUpdatedCellListener(this::cellUpdatedListener);
+        guessedPicture.setUpdatedCellListener(this::updateCell);
         height = picture.getHeight();
         width = picture.getWidth();
         this.leftNumbers = leftNumbers;
@@ -60,9 +60,7 @@ public class GameForm {
 
         JFrame frame = new JFrame("MainForm");
         frame.setContentPane(mainPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(PREFERRED_FORM_SIZE);
-        frame.addWindowListener(new FrameWindowListener());
         frame.pack();
         frame.setVisible(true);
     }
@@ -143,7 +141,7 @@ public class GameForm {
         System.out.println("Congratulations!!!");
     }
 
-    private void cellUpdatedListener(Answer answer, Point point) {
+    private void updateCell(Answer answer, Point point) {
         cells[point.y][point.x].setBackground(answerToColor.get(answer));
     }
 
@@ -163,14 +161,6 @@ public class GameForm {
                 cellColor = stateToColor.get(cellState);
             }
             cell.setBackground(cellColor);
-        }
-    }
-
-    private class FrameWindowListener extends WindowAdapter {
-
-        @Override
-        public void windowClosing(WindowEvent e) {
-            sender.send(Message.STOP_SESSION);
         }
     }
 }
