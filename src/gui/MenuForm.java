@@ -5,7 +5,9 @@ import client.ClientMessageReceiver;
 import client.ClientMessageSender;
 import message.Message;
 import message.request.CreateGameRequest;
+import message.request.JoinToGameRequest;
 import picture.*;
+import server.GameInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 
 public class MenuForm {
     private static final Dimension PREFERRED_FORM_SIZE = new Dimension(800, 800);
@@ -21,13 +24,15 @@ public class MenuForm {
     private JButton connectButton;
     private JLabel connectLabel;
     private JButton createGameButton;
-    private JLabel createGameLabel;
+    private JLabel pictureLabel;
     private JButton startButton;
     private JList gamesList;
     private JTextField gameNameTextField;
     private JButton refreshGamesListButton;
+    private JButton joinButton;
     private ClientMessageSender sender;
     private StashedPicture stashedPicture;
+    private List<GameInfo> gamesInfo;
 
     MenuForm() {
         MessageProcessor processor = new MessageProcessor();
@@ -37,10 +42,18 @@ public class MenuForm {
         });
         processor.setCreatedGameListener(response -> {
             stashedPicture = response.getStashedPicture();
-            createGameLabel.setText("game created "
+            pictureLabel.setText("game created "
                     + stashedPicture);
         });
-        processor.setGamesInfoListener(response -> gamesList.setListData(response.getGamesInfo().toArray()));
+        processor.setJoinedToGameListener(response -> {
+            stashedPicture = response.getStashedPicture();
+            pictureLabel.setText("joined to game "
+                    + stashedPicture);
+        });
+        processor.setGamesInfoListener(response -> {
+            gamesInfo = response.getGamesInfo();
+            gamesList.setListData(gamesInfo.toArray());
+        });
 
         connectButton.addActionListener(e -> {
             Socket socket = null;
@@ -64,6 +77,10 @@ public class MenuForm {
             GameForm gameForm = new GameForm(picture, new Numbers(stashedPicture, NumbersSide.LEFT),
                     new Numbers(stashedPicture, NumbersSide.TOP));
         });
+        joinButton.addActionListener(e -> {
+            int selectedIndex = gamesList.getSelectedIndex();
+            sender.send(JoinToGameRequest.pack(gamesInfo.get(selectedIndex).getId()));
+        });
     }
 
     private void createSenderAndStartReceiver(Socket socket, MessageProcessor processor) {
@@ -86,7 +103,11 @@ public class MenuForm {
     private class FrameWindowListener extends WindowAdapter {
         @Override
         public void windowClosing(WindowEvent e) {
-            sender.send(Message.STOP_SESSION);
+            try {
+                sender.send(Message.STOP_SESSION);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

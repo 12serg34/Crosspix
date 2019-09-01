@@ -1,10 +1,7 @@
 package client;
 
 import message.Message;
-import message.response.GameCreatedResponse;
-import message.response.GamesInfoResponse;
-import message.response.MistakeResponse;
-import message.response.SuccessResponse;
+import message.response.*;
 
 import java.io.Serializable;
 import java.util.function.Consumer;
@@ -13,6 +10,7 @@ public class MessageProcessor {
     private Runnable pongMessageListener;
     private Consumer<GamesInfoResponse> gamesInfoListener;
     private Consumer<GameCreatedResponse> startedGameListener;
+    private Consumer<JoinToGameResponse> joinedToGameListener;
     private Consumer<SuccessResponse> successMessageListener;
     private Consumer<MistakeResponse> mistakeMessageListener;
 
@@ -28,6 +26,9 @@ public class MessageProcessor {
             case GAME_CREATED:
                 startedGameListener.accept((GameCreatedResponse) data);
                 break;
+            case JOINED_TO_GAME:
+                joinedToGameListener.accept((JoinToGameResponse) data);
+                break;
             case SUCCESS:
                 successMessageListener.accept((SuccessResponse) data);
                 break;
@@ -39,6 +40,10 @@ public class MessageProcessor {
 
     public void setCreatedGameListener(Consumer<GameCreatedResponse> listener) {
         startedGameListener = listener;
+    }
+
+    public void setJoinedToGameListener(Consumer<JoinToGameResponse> listener) {
+        joinedToGameListener = listener;
     }
 
     public void setSuccessMessageListener(Consumer<SuccessResponse> listener) {

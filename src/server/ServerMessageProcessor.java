@@ -3,10 +3,8 @@ package server;
 import message.*;
 import message.request.CreateGameRequest;
 import message.request.DiscoverCellRequest;
-import message.response.GameCreatedResponse;
-import message.response.GamesInfoResponse;
-import message.response.MistakeResponse;
-import message.response.SuccessResponse;
+import message.request.JoinToGameRequest;
+import message.response.*;
 import picture.Answer;
 
 public class ServerMessageProcessor {
@@ -35,6 +33,9 @@ public class ServerMessageProcessor {
                 break;
             case DISCOVER_CELL:
                 discoverCell((DiscoverCellRequest) message.getData());
+                break;
+            case JOIN_TO_GAME:
+                jointToGame((JoinToGameRequest) message.getData());
                 break;
         }
     }
@@ -68,6 +69,12 @@ public class ServerMessageProcessor {
         if (message != null) {
             game.cellsUpdated(message);
         }
+    }
+
+    private void jointToGame(JoinToGameRequest request) {
+        game = gamesPool.get(request.getGameId());
+        game.subscribeToUpdateCells(this::sendUpdates);
+        service.send(JoinToGameResponse.pack(game.getStashedPicture()));
     }
 
     private void sendUpdates(Message response) {
