@@ -1,13 +1,13 @@
 package gui;
 
-import client.MessageProcessor;
-import client.ClientMessageReceiver;
-import client.ClientMessageSender;
-import message.Message;
-import message.request.CreateGameRequest;
-import message.request.JoinToGameRequest;
-import picture.*;
+import client.ResponseReceiver;
 import entities.GameInfo;
+import message.CellUpdatedNotification;
+import message.MessageSender;
+import message.response.ResponseNotifier;
+import message.request.*;
+import message.response.*;
+import picture.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,29 +30,34 @@ public class MenuForm {
     private JTextField gameNameTextField;
     private JButton refreshGamesListButton;
     private JButton joinButton;
-    private ClientMessageSender sender;
+    private MessageSender sender;
     private StashedPicture stashedPicture;
     private List<GameInfo> gamesInfo;
 
     MenuForm() {
-        MessageProcessor processor = new MessageProcessor();
-        processor.setPongMessageListener(() -> {
+        ResponseNotifier notifier = new ResponseNotifier();
+        notifier.subscribe(PongResponse.class, pong -> {
             connectLabel.setText("connected");
-            sender.send(Message.GET_GAMES_INFO);
+            sender.send(message.request.GamesInfoRequest.getInstance());
         });
-        processor.setCreatedGameListener(response -> {
+        notifier.subscribe(GameCreatedResponse.class, response -> {
             stashedPicture = response.getStashedPicture();
             pictureLabel.setText("game created "
                     + stashedPicture);
         });
-        processor.setJoinedToGameListener(response -> {
+        notifier.subscribe(JoinedToGameResponse.class, response -> {
             stashedPicture = response.getStashedPicture();
             pictureLabel.setText("joined to game "
                     + stashedPicture);
         });
-        processor.setGamesInfoListener(response -> {
+        notifier.subscribe(GamesInfoResponse.class, response -> {
             gamesInfo = response.getGamesInfo();
             gamesList.setListData(gamesInfo.toArray());
+        });
+        notifier.subscribe(CellDiscoveredResponse.class, response -> {
+        });
+        notifier.subscribe(CellUpdatedNotification.class, response -> {
+
         });
 
         connectButton.addActionListener(e -> {
@@ -62,33 +67,31 @@ public class MenuForm {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
-            createSenderAndStartReceiver(socket, processor);
-            sender.send(Message.PING);
+            createSenderAndStartReceiver(socket, notifier);
+            sender.send(PingRequest.getInstance());
         });
-        refreshGamesListButton.addActionListener(e -> {
-            sender.send(Message.GET_GAMES_INFO);
-        });
+        refreshGamesListButton.addActionListener(e -> sender.send(GamesInfoRequest.getInstance()));
         createGameButton.addActionListener(e -> {
             System.out.println("Creating game");
-            sender.send(CreateGameRequest.pack(gameNameTextField.getText()));
+            sender.send(new CreateGameRequest(gameNameTextField.getText()));
         });
         startButton.addActionListener(e -> {
-            GuessedPicture picture = new MultiPlayerGuessedPicture(stashedPicture, sender, processor);
+            GuessedPicture picture = new MultiPlayerGuessedPicture(stashedPicture, sender, notifier);
             GameForm gameForm = new GameForm(picture, new Numbers(stashedPicture, NumbersSide.LEFT),
                     new Numbers(stashedPicture, NumbersSide.TOP));
         });
         joinButton.addActionListener(e -> {
             int selectedIndex = gamesList.getSelectedIndex();
-            sender.send(JoinToGameRequest.pack(gamesInfo.get(selectedIndex).getId()));
+            sender.send(new JoinToGameRequest(gamesInfo.get(selectedIndex).getId()));
         });
     }
 
-    private void createSenderAndStartReceiver(Socket socket, MessageProcessor processor) {
-        sender = new ClientMessageSender(socket);
-        ClientMessageReceiver.start(socket, processor);
+    private void createSenderAndStartReceiver(Socket socket, ResponseNotifier notifier) {
+        sender = new MessageSender(socket);
+        ResponseReceiver.start(socket, notifier);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         MenuForm menuForm = new MenuForm();
 
         JFrame frame = new JFrame("MenuForm");
@@ -104,7 +107,7 @@ public class MenuForm {
         @Override
         public void windowClosing(WindowEvent e) {
             try {
-                sender.send(Message.STOP_SESSION);
+                sender.send(StopSessionRequest.getInstance());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

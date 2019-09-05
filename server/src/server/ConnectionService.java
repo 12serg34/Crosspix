@@ -19,7 +19,7 @@ public class ConnectionService implements Runnable {
                 Socket socket = serverSocket.accept();
                 System.out.println("Accepted connection from: " + socket.getRemoteSocketAddress());
                 ServerMessageProcessor processor = new ServerMessageProcessor(gamesPool);
-                MessageService.start(socket, processor);
+                RequestService.start(socket, processor);
             } catch (IOException e) {
                 e.printStackTrace();
             }

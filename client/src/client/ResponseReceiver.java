@@ -1,23 +1,22 @@
 package client;
 
-import message.Message;
-import message.MessageHeader;
+import message.response.Response;
+import message.response.ResponseNotifier;
+import message.response.SessionStoppedResponse;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
-public class ClientMessageReceiver implements Runnable {
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
-
+public class ResponseReceiver implements Runnable {
     private Socket socket;
-    private MessageProcessor processor;
     private ObjectInputStream reader;
+    private ResponseNotifier notifier;
 
-    private ClientMessageReceiver(Socket socket, MessageProcessor processor) {
+    private ResponseReceiver(Socket socket, ResponseNotifier notifier) {
         this.socket = socket;
-        this.processor = processor;
+        this.notifier = notifier;
         initialize();
     }
 
@@ -30,8 +29,8 @@ public class ClientMessageReceiver implements Runnable {
         }
     }
 
-    public static void start(Socket socket, MessageProcessor processor) {
-        new Thread(new ClientMessageReceiver(socket, processor)).start();
+    public static void start(Socket socket, ResponseNotifier notifier) {
+        new Thread(new ResponseReceiver(socket, notifier)).start();
     }
 
     public void run() {
@@ -45,12 +44,12 @@ public class ClientMessageReceiver implements Runnable {
     }
 
     private void runImpl() throws IOException, ClassNotFoundException {
-        Message message = Message.EMPTY;
-        System.out.println(message);
-        while (message.getHeader() != MessageHeader.STOP_SESSION) {
-            message = (Message) reader.readObject();
-            System.out.println("Got - " + message);
-            processor.process(message);
+        Response response = (Response) reader.readObject();
+        System.out.println(response);
+        while (!(response instanceof SessionStoppedResponse)) {
+            response = (Response) reader.readObject();
+            System.out.println("Got - " + response.getClass().getSimpleName());
+            notifier.notify(response);
         }
     }
 

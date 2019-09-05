@@ -1,6 +1,7 @@
 package entities;
 
-import message.Message;
+import message.CellUpdatedNotification;
+import picture.Answer;
 import picture.ServerGuessedPicture;
 import picture.StashedPicture;
 
@@ -12,11 +13,11 @@ public class Game {
     private GameInfo info;
     private StashedPicture stashedPicture;
     private ServerGuessedPicture guessedPicture;
-    private final List<Consumer<Message>> listeners;
+    private List<Consumer<CellUpdatedNotification>> listeners;
 
     public Game(GameInfo info) {
         this.info = info;
-        listeners = new ArrayList<>(3);
+        listeners = new ArrayList<Consumer<CellUpdatedNotification>>(4);
     }
 
     public void initialize(int height, int width) {
@@ -36,11 +37,11 @@ public class Game {
         return stashedPicture;
     }
 
-    public void subscribeToUpdateCells(Consumer<Message> listener) {
-        listeners.add(listener);
+    public void subscribeToUpdatedCells(Consumer<CellUpdatedNotification> responseListener) {
+        listeners.add(responseListener);
     }
 
-    public void cellsUpdated(Message message) {
-        listeners.forEach(x -> x.accept(message));
+    public void cellsUpdated(CellUpdatedNotification update) {
+        listeners.forEach(x -> x.accept(update));
     }
 }

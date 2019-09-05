@@ -2,11 +2,11 @@ package message.response;
 
 import picture.StashedPicture;
 
-public class GameCreatedResponse implements Response {
-    private static final long serialVersionUID = -5476441886572684946L;
+public class JoinedToGameResponse implements Response {
+    private static final long serialVersionUID = 7873540238231988321L;
     private final StashedPicture stashedPicture;
 
-    public GameCreatedResponse(StashedPicture stashedPicture) {
+    public JoinedToGameResponse(StashedPicture stashedPicture) {
         this.stashedPicture = stashedPicture;
     }
 

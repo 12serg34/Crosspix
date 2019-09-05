@@ -1,84 +1,95 @@
 package server;
 
+import com.sun.istack.internal.NotNull;
 import entities.Game;
-import message.Message;
-import message.request.CreateGameRequest;
-import message.request.DiscoverCellRequest;
-import message.request.JoinToGameRequest;
+import message.CellUpdatedNotification;
+import message.Handler;
+import message.request.Request;
+import message.request.RequestProcessor;
+import message.response.Response;
+import message.request.*;
 import message.response.*;
 import picture.Answer;
 
 public class ServerMessageProcessor {
-    private MessageService service;
+    private RequestService service;
     private Game game;
-    private GamesPool gamesPool;
+    private final GamesPool gamesPool;
+    private final RequestProcessor processor;
 
     public ServerMessageProcessor(GamesPool gamesPool) {
         this.gamesPool = gamesPool;
+        processor = new RequestProcessor();
+        initHandlers();
     }
 
-    void setMessageService(MessageService service) {
-        this.service = service;
+    private void initHandlers() {
+        processor.putHandler(
+                PingRequest.class,
+                (Handler<PingRequest, PongResponse>) this::ping
+        );
+        processor.putHandler(
+                GamesInfoRequest.class,
+                (Handler<GamesInfoRequest, GamesInfoResponse>) this::getGamesInfo
+        );
+        processor.putHandler(
+                CreateGameRequest.class,
+                (Handler<CreateGameRequest, GameCreatedResponse>) this::createGame
+        );
+        processor.putHandler(
+                DiscoverCellRequest.class,
+                (Handler<DiscoverCellRequest, CellDiscoveredResponse>) this::discoverCell
+        );
+        processor.putHandler(
+                JoinToGameRequest.class,
+                (Handler<JoinToGameRequest, JoinedToGameResponse>) this::jointToGame
+        );
     }
 
-    void process(Message message) {
-        switch (message.getHeader()) {
-            case PING:
-                service.send(Message.PONG);
-                break;
-            case GET_GAMES_INFO:
-                getGamesInfo();
-                break;
-            case CREATE_GAME:
-                createGame((CreateGameRequest) message.getData());
-                break;
-            case DISCOVER_CELL:
-                discoverCell((DiscoverCellRequest) message.getData());
-                break;
-            case JOIN_TO_GAME:
-                jointToGame((JoinToGameRequest) message.getData());
-                break;
-        }
+    private PongResponse ping(PingRequest request) {
+        return PongResponse.getInstance();
     }
 
-    private void getGamesInfo() {
-        service.send(GamesInfoResponse.pack(gamesPool.getGamesInfo()));
+    @NotNull
+    private GamesInfoResponse getGamesInfo(GamesInfoRequest request) {
+        return new GamesInfoResponse(gamesPool.getGamesInfo());
     }
 
-    private void createGame(CreateGameRequest request) {
+    private GameCreatedResponse createGame(CreateGameRequest request) {
         game = gamesPool.putNewGame(request.getName());
         int height = 5;
         int width = 5;
         game.initialize(height, width);
-        game.subscribeToUpdateCells(this::sendUpdates);
-        service.send(GameCreatedResponse.pack(game.getStashedPicture()));
+        game.subscribeToUpdatedCells(update -> service.send(update));
+        return new GameCreatedResponse(game.getStashedPicture());
     }
 
-    private void discoverCell(DiscoverCellRequest request) {
+    private CellDiscoveredResponse discoverCell(DiscoverCellRequest request) {
         int i = request.getI();
         int j = request.getJ();
         Answer answer = game.getGuessedPicture().discoverRequest(i, j);
-        Message message = null;
-        switch (answer) {
-            case SUCCESS:
-                message = SuccessResponse.pack(i, j);
-                break;
-            case MISTAKE:
-                message = MistakeResponse.pack(i, j);
-                break;
+        CellDiscoveredResponse response = new CellDiscoveredResponse(answer);
+        if (answer != Answer.NOTHING) {
+            game.cellsUpdated(new CellUpdatedNotification(answer, i, j));
         }
-        if (message != null) {
-            game.cellsUpdated(message);
-        }
+        return response;
     }
 
-    private void jointToGame(JoinToGameRequest request) {
+    private JoinedToGameResponse jointToGame(JoinToGameRequest request) {
         game = gamesPool.get(request.getGameId());
-        game.subscribeToUpdateCells(this::sendUpdates);
-        service.send(JoinToGameResponse.pack(game.getStashedPicture()));
+        game.subscribeToUpdatedCells(update -> service.send(update));
+        return new JoinedToGameResponse(game.getStashedPicture());
     }
 
-    private void sendUpdates(Message response) {
+    void process(Request request) {
+        sendResponse(processor.process(request));
+    }
+
+    void setMessageService(RequestService service) {
+        this.service = service;
+    }
+
+    private void sendResponse(Response response) {
         service.send(response);
     }
 }

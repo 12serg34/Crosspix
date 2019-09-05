@@ -1,10 +1,9 @@
 package picture;
 
-import message.MessageProcessor;
 import message.MessageSender;
+import message.response.ResponseNotifier;
 import message.request.DiscoverCellRequest;
-import message.response.MistakeResponse;
-import message.response.SuccessResponse;
+import message.CellUpdatedNotification;
 
 import java.awt.*;
 import java.util.function.BiConsumer;
@@ -14,7 +13,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final CellState[][] field;
     private final int height;
     private final int width;
-    private MessageProcessor processor;
+    private ResponseNotifier notifier;
     private MessageSender sender;
 
     private int amountOfSuccesses;
@@ -23,14 +22,13 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     public MultiPlayerGuessedPicture(StashedPicture stashedPicture,
                                      MessageSender sender,
-                                     MessageProcessor processor) {
+                                     ResponseNotifier notifier) {
         this.sender = sender;
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
-        this.processor = processor;
-        processor.setSuccessMessageListener(this::successReceived);
-        processor.setMistakeMessageListener(this::mistakeReceived);
+        this.notifier = notifier;
+        notifier.subscribe(CellUpdatedNotification.class, this::cellUpdateReceived);
         field = new CellState[height][width];
         initializeField();
     }
@@ -59,7 +57,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     public Answer discoverRequest(int i, int j) {
         if (field[i][j] == CellState.BLANK) {
-            sender.send(DiscoverCellRequest.pack(i, j));
+            sender.send(new DiscoverCellRequest(i, j));
             return Answer.WAIT;
         }
         return Answer.NOTHING;
@@ -82,19 +80,21 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
         }
     }
 
-    private void successReceived(SuccessResponse message) {
-        int i = message.getI();
-        int j = message.getJ();
-        field[i][j] = CellState.FULL;
-        amountOfSuccesses++;
-        updatedCellListener.accept(Answer.SUCCESS, new Point(j, i));
-    }
+    private void cellUpdateReceived(CellUpdatedNotification response) {
+        int i = response.getI();
+        int j = response.getJ();
+        Answer answer = response.getAnswer();
+        CellState state = CellState.BLANK;
+        if (answer == Answer.SUCCESS) {
+            state = CellState.FULL;
+            amountOfSuccesses++;
+        }
+        if (answer == Answer.MISTAKE) {
+            state = CellState.EMPTY;
 
-    private void mistakeReceived(MistakeResponse message) {
-        int i = message.getI();
-        int j = message.getJ();
-        field[i][j] = CellState.EMPTY;
-        updatedCellListener.accept(Answer.MISTAKE, new Point(j, i));
+        }
+        field[i][j] = state;
+        updatedCellListener.accept(answer, new Point(j, i));
     }
 
     public void setUpdatedCellListener(BiConsumer<Answer, Point> updatedCellListener) {
