@@ -24,6 +24,7 @@ public class GameForm {
 
     static {
         stateToColor = new EnumMap<>(CellState.class);
+        stateToColor.put(CellState.FULL, Color.BLACK);
         stateToColor.put(CellState.BLANK, Color.WHITE);
         stateToColor.put(CellState.EMPTY, Color.GRAY);
 

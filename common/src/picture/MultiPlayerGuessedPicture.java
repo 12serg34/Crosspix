@@ -91,7 +91,6 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
         }
         if (answer == Answer.MISTAKE) {
             state = CellState.EMPTY;
-
         }
         field[i][j] = state;
         updatedCellListener.accept(answer, new Point(j, i));
