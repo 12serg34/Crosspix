@@ -1,6 +1,6 @@
 package message.response;
 
-public class PongResponse implements Response {
+public class PongResponse extends Response {
     private static final long serialVersionUID = 4401586269516294059L;
     private static final PongResponse instance;
 

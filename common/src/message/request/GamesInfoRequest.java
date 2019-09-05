@@ -1,6 +1,6 @@
 package message.request;
 
-public class GamesInfoRequest implements Request {
+public class GamesInfoRequest extends Request {
     private static final long serialVersionUID = 4401586269516294059L;
     private static final GamesInfoRequest instance;
 

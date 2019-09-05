@@ -2,7 +2,7 @@ package message.response;
 
 import picture.Answer;
 
-public class CellDiscoveredResponse implements Response {
+public class CellDiscoveredResponse extends Response {
     private static final long serialVersionUID = -5476441886572684946L;
     private final Answer answer;
 

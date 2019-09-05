@@ -1,8 +1,5 @@
 package message.response;
 
-import message.response.Response;
-import message.response.ResponseListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

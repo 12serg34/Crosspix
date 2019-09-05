@@ -1,6 +1,6 @@
 package message.request;
 
-public class JoinToGameRequest implements Request {
+public class JoinToGameRequest extends Request {
     private static final long serialVersionUID = 54283151306590918L;
     private final int gameId;
 

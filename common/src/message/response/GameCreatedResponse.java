@@ -2,7 +2,7 @@ package message.response;
 
 import picture.StashedPicture;
 
-public class GameCreatedResponse implements Response {
+public class GameCreatedResponse extends Response {
     private static final long serialVersionUID = -5476441886572684946L;
     private final StashedPicture stashedPicture;
 

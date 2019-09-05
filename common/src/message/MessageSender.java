@@ -1,7 +1,5 @@
 package message;
 
-import message.request.Request;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -27,7 +25,7 @@ public class MessageSender {
         try {
             writer.writeObject(message);
             writer.flush();
-            System.out.println("Sent - " + message.getClass().getSimpleName());
+            System.out.println("Sent - " + message);
         } catch (Exception e) {
             e.printStackTrace();
         }

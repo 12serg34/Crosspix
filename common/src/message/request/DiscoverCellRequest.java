@@ -1,6 +1,6 @@
 package message.request;
 
-public class DiscoverCellRequest implements Request {
+public class DiscoverCellRequest extends Request {
     private static final long serialVersionUID = 7199493256943566238L;
 
     private final int i;

@@ -1,10 +1,7 @@
 package gui;
 
-import client.ResponseReceiver;
 import entities.GameInfo;
-import message.CellUpdatedNotification;
 import message.MessageSender;
-import message.response.ResponseNotifier;
 import message.request.*;
 import message.response.*;
 import picture.*;
@@ -38,7 +35,7 @@ public class MenuForm {
         ResponseNotifier notifier = new ResponseNotifier();
         notifier.subscribe(PongResponse.class, pong -> {
             connectLabel.setText("connected");
-            sender.send(message.request.GamesInfoRequest.getInstance());
+            sender.send(GamesInfoRequest.getInstance());
         });
         notifier.subscribe(GameCreatedResponse.class, response -> {
             stashedPicture = response.getStashedPicture();
@@ -56,9 +53,9 @@ public class MenuForm {
         });
         notifier.subscribe(CellDiscoveredResponse.class, response -> {
         });
-        notifier.subscribe(CellUpdatedNotification.class, response -> {
-
+        notifier.subscribe(SessionStoppedResponse.class, response -> {
         });
+
 
         connectButton.addActionListener(e -> {
             Socket socket = null;

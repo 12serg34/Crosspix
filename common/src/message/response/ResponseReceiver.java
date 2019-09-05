@@ -1,8 +1,4 @@
-package client;
-
-import message.response.Response;
-import message.response.ResponseNotifier;
-import message.response.SessionStoppedResponse;
+package message.response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +41,11 @@ public class ResponseReceiver implements Runnable {
 
     private void runImpl() throws IOException, ClassNotFoundException {
         Response response = (Response) reader.readObject();
-        System.out.println(response);
+        System.out.println("Got - " + response);
+        notifier.notify(response);
         while (!(response instanceof SessionStoppedResponse)) {
             response = (Response) reader.readObject();
-            System.out.println("Got - " + response.getClass().getSimpleName());
+            System.out.println("Got - " + response);
             notifier.notify(response);
         }
     }

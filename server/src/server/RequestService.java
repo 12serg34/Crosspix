@@ -52,10 +52,10 @@ public class RequestService implements Runnable {
     private Optional<Request> waitNext() throws IOException, ClassNotFoundException {
         Object object = reader.readObject();
         if (object instanceof Request) {
-            System.out.println("Got - " + object.getClass().getSimpleName());
+            System.out.println("Got - " + object);
             return Optional.of(((Request) object));
         }
-        System.out.println("Error: Got not a request - " + object.getClass().getSimpleName());
+        System.out.println("Error: Got not a request - " + object);
         return Optional.empty();
     }
 
@@ -71,7 +71,7 @@ public class RequestService implements Runnable {
         try {
             writer.writeObject(response);
             writer.flush();
-            System.out.println("Sent - " + response.getClass().getSimpleName());
+            System.out.println("Sent - " + response);
         } catch (IOException e) {
             e.printStackTrace();
         }
