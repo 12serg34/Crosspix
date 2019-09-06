@@ -1,21 +1,18 @@
 package message;
 
+import message.request.PingRequest;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class MessageSender {
-    private Socket socket;
     private ObjectOutputStream writer;
 
-    public MessageSender(Socket socket) {
-        this.socket = socket;
-        initialize();
-    }
-
-    private void initialize() {
+    void init(Socket socket) {
         try {
             writer = new ObjectOutputStream(socket.getOutputStream());
+            send(PingRequest.getInstance());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,5 +27,4 @@ public class MessageSender {
             e.printStackTrace();
         }
     }
-
 }

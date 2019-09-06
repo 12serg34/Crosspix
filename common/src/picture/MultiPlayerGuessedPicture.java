@@ -1,7 +1,7 @@
 package picture;
 
 import message.MessageSender;
-import message.response.ResponseNotifier;
+import message.response.Notifier;
 import message.request.DiscoverCellRequest;
 import message.CellUpdatedNotification;
 
@@ -13,7 +13,6 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final CellState[][] field;
     private final int height;
     private final int width;
-    private ResponseNotifier notifier;
     private MessageSender sender;
 
     private int amountOfSuccesses;
@@ -22,12 +21,11 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     public MultiPlayerGuessedPicture(StashedPicture stashedPicture,
                                      MessageSender sender,
-                                     ResponseNotifier notifier) {
+                                     Notifier notifier) {
         this.sender = sender;
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
-        this.notifier = notifier;
         notifier.subscribe(CellUpdatedNotification.class, this::cellUpdateReceived);
         field = new CellState[height][width];
         initializeField();

@@ -3,7 +3,7 @@ package message;
 import message.response.Response;
 import picture.Answer;
 
-public class CellUpdatedNotification extends Response {
+public class CellUpdatedNotification extends Message {
     private static final long serialVersionUID = -5476441886572684946L;
     private final Answer answer;
     private int i;

@@ -1,9 +1,9 @@
 package server;
 
+import message.Message;
 import message.request.Request;
 import message.request.StopSessionRequest;
-import message.response.Response;
-import message.response.SessionStoppedResponse;
+import message.response.SessionStoppedNotification;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -67,11 +67,11 @@ public class RequestService implements Runnable {
         return optional.get();
     }
 
-    void send(Response response) {
+    void send(Message message) {
         try {
-            writer.writeObject(response);
+            writer.writeObject(message);
             writer.flush();
-            System.out.println("Sent - " + response);
+            System.out.println("Sent - " + message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,7 +79,7 @@ public class RequestService implements Runnable {
 
     private void closeSession() {
         try {
-            send(SessionStoppedResponse.getInstance());
+            send(SessionStoppedNotification.getInstance());
             socket.close();
             System.out.println("Closed socket connection with " + socket.getRemoteSocketAddress());
         } catch (IOException e) {

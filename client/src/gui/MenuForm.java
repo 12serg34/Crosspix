@@ -2,6 +2,7 @@ package gui;
 
 import entities.GameInfo;
 import message.MessageSender;
+import message.MessageService;
 import message.request.*;
 import message.response.*;
 import picture.*;
@@ -10,8 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.net.Socket;
 import java.util.List;
 
 public class MenuForm {
@@ -32,7 +31,7 @@ public class MenuForm {
     private List<GameInfo> gamesInfo;
 
     MenuForm() {
-        ResponseNotifier notifier = new ResponseNotifier();
+        Notifier notifier = new Notifier();
         notifier.subscribe(PongResponse.class, pong -> {
             connectLabel.setText("connected");
             sender.send(GamesInfoRequest.getInstance());
@@ -53,19 +52,12 @@ public class MenuForm {
         });
         notifier.subscribe(CellDiscoveredResponse.class, response -> {
         });
-        notifier.subscribe(SessionStoppedResponse.class, response -> {
+        notifier.subscribe(SessionStoppedNotification.class, response -> {
         });
 
 
         connectButton.addActionListener(e -> {
-            Socket socket = null;
-            try {
-                socket = new Socket("localhost", 14500);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            createSenderAndStartReceiver(socket, notifier);
-            sender.send(PingRequest.getInstance());
+            sender = MessageService.connect("localhost", 14500, notifier);
         });
         refreshGamesListButton.addActionListener(e -> sender.send(GamesInfoRequest.getInstance()));
         createGameButton.addActionListener(e -> {
@@ -81,11 +73,6 @@ public class MenuForm {
             int selectedIndex = gamesList.getSelectedIndex();
             sender.send(new JoinToGameRequest(gamesInfo.get(selectedIndex).getId()));
         });
-    }
-
-    private void createSenderAndStartReceiver(Socket socket, ResponseNotifier notifier) {
-        sender = new MessageSender(socket);
-        ResponseReceiver.start(socket, notifier);
     }
 
     public static void main(String[] args) {
