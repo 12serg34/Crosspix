@@ -1,5 +1,8 @@
 package picture;
 
+import function.Consumer;
+import message.CellUpdatedNotification;
+
 public class LocalGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
     private final CellState[][] field;
@@ -63,6 +66,11 @@ public class LocalGuessedPicture implements GuessedPicture {
                 field[i][j] = CellState.BLANK;
         }
         return field[i][j];
+    }
+
+    @Override
+    public void setUpdatedCellListener(Consumer<CellUpdatedNotification> listener) {
+
     }
 
     private void tryOfComplete() {

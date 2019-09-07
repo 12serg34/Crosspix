@@ -1,6 +1,5 @@
 package message;
 
-import message.response.Response;
 import picture.Answer;
 
 public class CellUpdatedNotification extends Message {

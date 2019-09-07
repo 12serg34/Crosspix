@@ -1,6 +1,8 @@
 package picture;
 
 import entities.Game;
+import function.Consumer;
+import message.CellUpdatedNotification;
 
 public class ServerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
@@ -67,6 +69,11 @@ public class ServerGuessedPicture implements GuessedPicture {
                 field[i][j] = CellState.BLANK;
         }
         return field[i][j];
+    }
+
+    @Override
+    public void setUpdatedCellListener(Consumer<CellUpdatedNotification> listener) {
+
     }
 
     private void tryOfComplete() {

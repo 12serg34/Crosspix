@@ -20,8 +20,13 @@ public class MessageService {
 
     public static MessageSender connect(String address, int port, Notifier notifier) {
         MessageSender sender = new MessageSender();
-        MessageService service = new MessageService(address, port, sender, notifier);
-        new Thread(service::start).start();
+        final MessageService service = new MessageService(address, port, sender, notifier);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                service.start();
+            }
+        }).start();
         return sender;
     }
 

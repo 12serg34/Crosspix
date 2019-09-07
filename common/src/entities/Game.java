@@ -1,13 +1,12 @@
 package entities;
 
+import function.Consumer;
 import message.CellUpdatedNotification;
-import picture.Answer;
 import picture.ServerGuessedPicture;
 import picture.StashedPicture;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class Game {
     private GameInfo info;
@@ -17,7 +16,7 @@ public class Game {
 
     public Game(GameInfo info) {
         this.info = info;
-        listeners = new ArrayList<Consumer<CellUpdatedNotification>>(4);
+        listeners = new ArrayList<>(4);
     }
 
     public void initialize(int height, int width) {
@@ -42,6 +41,8 @@ public class Game {
     }
 
     public void cellsUpdated(CellUpdatedNotification update) {
-        listeners.forEach(x -> x.accept(update));
+        for (Consumer<CellUpdatedNotification> listener : listeners) {
+            listener.accept(update);
+        }
     }
 }

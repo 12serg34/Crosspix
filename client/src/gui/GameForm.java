@@ -1,5 +1,6 @@
 package gui;
 
+import message.CellUpdatedNotification;
 import picture.Answer;
 import picture.CellState;
 import picture.GuessedPicture;
@@ -142,8 +143,8 @@ public class GameForm {
         System.out.println("Congratulations!!!");
     }
 
-    private void updateCell(Answer answer, Point point) {
-        cells[point.y][point.x].setBackground(answerToColor.get(answer));
+    private void updateCell(CellUpdatedNotification notification) {
+        cells[notification.getI()][notification.getJ()].setBackground(answerToColor.get(notification.getAnswer()));
     }
 
     private class FormMouseAdapter extends MouseAdapter {

@@ -14,11 +14,19 @@ public class Notifier {
         listeners = new HashMap<>(4);
     }
 
-    public void notify(Message message) {
-        listeners.get(message.getClass()).forEach(messageListener -> messageListener.accept(message));
+    public void notify(final Message message) {
+        List<MessageListener> listenerList = listeners.get(message.getClass());
+        for (MessageListener listener : listenerList) {
+            listener.accept(message);
+        }
     }
 
     public <U extends Message> void subscribe(Class<U> messageType, MessageListener<U> listener) {
-        listeners.computeIfAbsent(messageType, type -> new ArrayList<>(4)).add(listener);
+        List<MessageListener> listenerList = listeners.get(messageType);
+        if (listenerList == null) {
+            listenerList = new ArrayList<>(4);
+            listeners.put(messageType, listenerList);
+        }
+        listenerList.add(listener);
     }
 }

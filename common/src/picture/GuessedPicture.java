@@ -1,7 +1,7 @@
 package picture;
 
-import java.awt.*;
-import java.util.function.BiConsumer;
+import function.Consumer;
+import message.CellUpdatedNotification;
 
 public interface GuessedPicture {
 
@@ -15,7 +15,5 @@ public interface GuessedPicture {
 
     CellState toggleEmpty(int i, int j);
 
-    default void setUpdatedCellListener(BiConsumer<Answer, Point> listener) {
-
-    }
+    void setUpdatedCellListener(Consumer<CellUpdatedNotification> listener);
 }

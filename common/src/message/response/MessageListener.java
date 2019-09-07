@@ -1,8 +1,8 @@
 package message.response;
 
+import function.Consumer;
 import message.Message;
 
-@FunctionalInterface
-public interface MessageListener<U extends Message> {
-    public void accept(U message);
+public interface MessageListener<T extends Message> extends Consumer<T> {
+
 }

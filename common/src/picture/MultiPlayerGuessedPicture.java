@@ -1,12 +1,11 @@
 package picture;
 
-import message.MessageSender;
-import message.response.Notifier;
-import message.request.DiscoverCellRequest;
+import function.Consumer;
 import message.CellUpdatedNotification;
-
-import java.awt.*;
-import java.util.function.BiConsumer;
+import message.MessageSender;
+import message.request.DiscoverCellRequest;
+import message.response.MessageListener;
+import message.response.Notifier;
 
 public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;
@@ -17,7 +16,7 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
 
     private int amountOfSuccesses;
     private Runnable completeListener;
-    private BiConsumer<Answer, Point> updatedCellListener;
+    private Consumer<CellUpdatedNotification> updatedCellListener;
 
     public MultiPlayerGuessedPicture(StashedPicture stashedPicture,
                                      MessageSender sender,
@@ -26,7 +25,12 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
-        notifier.subscribe(CellUpdatedNotification.class, this::cellUpdateReceived);
+        notifier.subscribe(CellUpdatedNotification.class, new MessageListener<CellUpdatedNotification>() {
+            @Override
+            public void accept(CellUpdatedNotification response) {
+                MultiPlayerGuessedPicture.this.cellUpdateReceived(response);
+            }
+        });
         field = new CellState[height][width];
         initializeField();
     }
@@ -91,10 +95,10 @@ public class MultiPlayerGuessedPicture implements GuessedPicture {
             state = CellState.EMPTY;
         }
         field[i][j] = state;
-        updatedCellListener.accept(answer, new Point(j, i));
+        updatedCellListener.accept(new CellUpdatedNotification(answer, i, j));
     }
 
-    public void setUpdatedCellListener(BiConsumer<Answer, Point> updatedCellListener) {
+    public void setUpdatedCellListener(Consumer<CellUpdatedNotification> updatedCellListener) {
         this.updatedCellListener = updatedCellListener;
     }
 }
