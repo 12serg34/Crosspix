@@ -1,7 +1,10 @@
-package picture;
+package pictire;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import picture.Numbers;
+import picture.NumbersSide;
+import picture.StashedPicture;
 
 class NumbersTest {
     @Test

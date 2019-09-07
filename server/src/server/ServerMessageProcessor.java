@@ -1,5 +1,6 @@
 package server;
 
+import com.sun.istack.internal.NotNull;
 import entities.Game;
 import message.CellUpdatedNotification;
 import message.Handler;
@@ -49,6 +50,7 @@ public class ServerMessageProcessor {
         return PongResponse.getInstance();
     }
 
+    @NotNull
     private GamesInfoResponse getGamesInfo(GamesInfoRequest request) {
         return new GamesInfoResponse(gamesPool.getGamesInfo());
     }
