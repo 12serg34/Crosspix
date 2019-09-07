@@ -3,6 +3,9 @@
     <output-path>$PROJECT_DIR$/target/artifacts/common_jar</output-path>
     <root id="archive" name="common.jar">
       <element id="module-output" name="common" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/common/resources/MANIFEST.MF" />
+      </element>
     </root>
   </artifact>
 </component>

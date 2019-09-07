@@ -4,6 +4,9 @@
     <root id="archive" name="server.jar">
       <element id="module-output" name="server" />
       <element id="module-output" name="common" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/server/resources/MANIFEST.MF" />
+      </element>
     </root>
   </artifact>
 </component>
