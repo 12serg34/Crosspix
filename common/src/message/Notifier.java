@@ -1,6 +1,4 @@
-package message.response;
-
-import message.Message;
+package message;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -3,7 +3,7 @@ package server;
 import message.Message;
 import message.request.Request;
 import message.request.StopSessionRequest;
-import message.response.SessionStoppedNotification;
+import message.SessionStoppedNotification;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

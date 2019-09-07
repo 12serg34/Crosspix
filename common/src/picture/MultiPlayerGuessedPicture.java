@@ -4,8 +4,8 @@ import function.Consumer;
 import message.CellUpdatedNotification;
 import message.MessageSender;
 import message.request.DiscoverCellRequest;
-import message.response.MessageListener;
-import message.response.Notifier;
+import message.MessageListener;
+import message.Notifier;
 
 public class MultiPlayerGuessedPicture implements GuessedPicture {
     private final StashedPicture stashedPicture;

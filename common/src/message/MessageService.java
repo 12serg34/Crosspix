@@ -1,7 +1,5 @@
 package message;
 
-import message.response.Notifier;
-
 import java.io.IOException;
 import java.net.Socket;
 

@@ -3,6 +3,8 @@ package gui;
 import entities.GameInfo;
 import message.MessageSender;
 import message.MessageService;
+import message.Notifier;
+import message.SessionStoppedNotification;
 import message.request.*;
 import message.response.*;
 import picture.*;

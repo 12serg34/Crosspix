@@ -1,8 +1,5 @@
 package message;
 
-import message.response.Notifier;
-import message.response.SessionStoppedNotification;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
