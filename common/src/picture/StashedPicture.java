@@ -23,11 +23,11 @@ public class StashedPicture implements Serializable {
         countFullCells();
     }
 
-    int getWidth() {
+    public int getWidth() {
         return width;
     }
 
-    int getHeight() {
+    public int getHeight() {
         return height;
     }
 

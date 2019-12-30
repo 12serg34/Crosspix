@@ -14,8 +14,10 @@ public class Notifier {
 
     public void notify(final Message message) {
         List<MessageListener> listenerList = listeners.get(message.getClass());
-        for (MessageListener listener : listenerList) {
-            listener.accept(message);
+        if (listenerList != null) {
+            for (MessageListener listener : listenerList) {
+                listener.accept(message);
+            }
         }
     }
 
