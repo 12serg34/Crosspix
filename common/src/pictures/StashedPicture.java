@@ -1,4 +1,4 @@
-package picture;
+package pictures;
 
 import java.io.Serializable;
 import java.util.Random;
@@ -31,7 +31,7 @@ public class StashedPicture implements Serializable {
         return height;
     }
 
-    boolean getCell(int i, int j) {
+    public boolean getCell(int i, int j) {
         return picture[i][j];
     }
 

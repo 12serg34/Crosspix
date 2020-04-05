@@ -1,13 +1,17 @@
 package gui;
 
+import entities.GameContext;
 import entities.GameInfo;
 import message.MessageSender;
 import message.MessageService;
 import message.Notifier;
 import message.SessionStoppedNotification;
-import message.request.*;
+import message.request.CreateGameRequest;
+import message.request.GamesInfoRequest;
+import message.request.JoinToGameRequest;
+import message.request.StopSessionRequest;
 import message.response.*;
-import picture.*;
+import pictures.GuessedPicture;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +33,7 @@ public class MenuForm {
     private JButton refreshGamesListButton;
     private JButton joinButton;
     private MessageSender sender;
-    private StashedPicture stashedPicture;
+    private GameContext gameContext;
     private List<GameInfo> gamesInfo;
 
     MenuForm() {
@@ -39,14 +43,10 @@ public class MenuForm {
             sender.send(GamesInfoRequest.getInstance());
         });
         notifier.subscribe(GameCreatedResponse.class, response -> {
-            stashedPicture = response.getStashedPicture();
-            pictureLabel.setText("game created "
-                    + stashedPicture);
+            gameContext = response.getGameContext();
         });
         notifier.subscribe(JoinedToGameResponse.class, response -> {
-            stashedPicture = response.getStashedPicture();
-            pictureLabel.setText("joined to game "
-                    + stashedPicture);
+            gameContext = response.getGameContext();
         });
         notifier.subscribe(GamesInfoResponse.class, response -> {
             gamesInfo = response.getGamesInfo();
@@ -67,9 +67,10 @@ public class MenuForm {
             sender.send(new CreateGameRequest(gameNameTextField.getText()));
         });
         startButton.addActionListener(e -> {
-            GuessedPicture picture = new MultiPlayerGuessedPicture(stashedPicture, sender, notifier);
-            GameForm gameForm = new GameForm(picture, new Numbers(stashedPicture, NumbersSide.LEFT),
-                    new Numbers(stashedPicture, NumbersSide.TOP));
+            new GameForm(
+                    new GuessedPicture(gameContext.getField(), sender, notifier),
+                    gameContext.getLeftNumbers(),
+                    gameContext.getTopNumbers());
         });
         joinButton.addActionListener(e -> {
             int selectedIndex = gamesList.getSelectedIndex();

@@ -9,7 +9,7 @@ import message.request.RequestProcessor;
 import message.response.Response;
 import message.request.*;
 import message.response.*;
-import picture.Answer;
+import entities.Answer;
 
 public class ServerMessageProcessor {
     private RequestService service;
@@ -61,7 +61,7 @@ public class ServerMessageProcessor {
         int width = 5;
         game.initialize(height, width);
         game.subscribeToUpdatedCells(update -> service.send(update));
-        return new GameCreatedResponse(game.getStashedPicture());
+        return new GameCreatedResponse(game.getContext());
     }
 
     private CellDiscoveredResponse discoverCell(DiscoverCellRequest request) {
@@ -78,7 +78,7 @@ public class ServerMessageProcessor {
     private JoinedToGameResponse jointToGame(JoinToGameRequest request) {
         game = gamesPool.get(request.getGameId());
         game.subscribeToUpdatedCells(update -> service.send(update));
-        return new JoinedToGameResponse(game.getStashedPicture());
+        return new JoinedToGameResponse(game.getContext());
     }
 
     void process(Request request) {

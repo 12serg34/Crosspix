@@ -1,10 +1,10 @@
 package gui;
 
+import entities.Answer;
+import entities.CellState;
+import entities.Numbers;
 import message.CellUpdatedNotification;
-import picture.Answer;
-import picture.CellState;
-import picture.GuessedPicture;
-import picture.Numbers;
+import pictures.GuessedPicture;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -22,6 +22,8 @@ public class GameForm {
     private static final int RIGHT_MOUSE_BUTTON = MouseEvent.BUTTON3;
     private static final EnumMap<CellState, Color> stateToColor;
     private static final EnumMap<Answer, Color> answerToColor;
+    private static final Color WAIT_COLOR = Color.BLUE;
+
 
     static {
         stateToColor = new EnumMap<>(CellState.class);
@@ -32,7 +34,6 @@ public class GameForm {
         answerToColor = new EnumMap<>(Answer.class);
         answerToColor.put(Answer.SUCCESS, Color.BLACK);
         answerToColor.put(Answer.MISTAKE, Color.RED);
-        answerToColor.put(Answer.WAIT, Color.BLUE);
     }
 
     private JPanel mainPanel;
@@ -50,10 +51,9 @@ public class GameForm {
 
     GameForm(GuessedPicture picture, Numbers leftNumbers, Numbers topNumbers) {
         guessedPicture = picture;
-        guessedPicture.setCompleteListener(this::complete);
         guessedPicture.setUpdatedCellListener(this::updateCell);
-        height = picture.getHeight();
-        width = picture.getWidth();
+        height = leftNumbers.getSize();
+        width = topNumbers.getSize();
         this.leftNumbers = leftNumbers;
         this.topNumbers = topNumbers;
         initializeLeftNumbers();
@@ -77,7 +77,7 @@ public class GameForm {
             for (int j = 0; j < width; j++) {
                 JPanel cell = new JPanel();
                 cell.addMouseListener(mouseAdapter);
-                cell.setBackground(Color.WHITE);
+                cell.setBackground(stateToColor.get(guessedPicture.getCellState(i, j)));
                 cell.setBorder(lineBorder);
                 cells[i][j] = cell;
                 cellToPoint.put(cell, new Point(j, i));
@@ -139,12 +139,11 @@ public class GameForm {
         }
     }
 
-    private void complete() {
-        System.out.println("Congratulations!!!");
-    }
-
     private void updateCell(CellUpdatedNotification notification) {
-        cells[notification.getI()][notification.getJ()].setBackground(answerToColor.get(notification.getAnswer()));
+        Answer answer = notification.getAnswer();
+        if (answer != Answer.NOTHING) {
+            cells[notification.getI()][notification.getJ()].setBackground(answerToColor.get(answer));
+        }
     }
 
     private class FormMouseAdapter extends MouseAdapter {
@@ -154,9 +153,9 @@ public class GameForm {
             Point point = cellToPoint.get(cell);
             Color cellColor = cell.getBackground();
             if (e.getButton() == LEFT_MOUSE_BUTTON) {
-                Answer answer = guessedPicture.discoverRequest(point.y, point.x);
-                if (answer != Answer.NOTHING) {
-                    cellColor = answerToColor.get(answer);
+                if (guessedPicture.getCellState(point.y, point.x) == CellState.BLANK) {
+                    guessedPicture.discoverRequest(point.y, point.x);
+                    cellColor = WAIT_COLOR;
                 }
             } else if (e.getButton() == RIGHT_MOUSE_BUTTON) {
                 CellState cellState = guessedPicture.toggleEmpty(point.y, point.x);

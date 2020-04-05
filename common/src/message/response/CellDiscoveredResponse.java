@@ -1,6 +1,6 @@
 package message.response;
 
-import picture.Answer;
+import entities.Answer;
 
 public class CellDiscoveredResponse extends Response {
     private static final long serialVersionUID = -5476441886572684946L;

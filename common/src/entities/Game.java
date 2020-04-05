@@ -2,8 +2,8 @@ package entities;
 
 import function.Consumer;
 import message.CellUpdatedNotification;
-import picture.ServerGuessedPicture;
-import picture.StashedPicture;
+import pictures.ServerGuessedPicture;
+import pictures.StashedPicture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ import java.util.List;
 public class Game {
     private GameInfo info;
     private StashedPicture stashedPicture;
+    private GameContext context;
     private ServerGuessedPicture guessedPicture;
     private List<Consumer<CellUpdatedNotification>> listeners;
 
@@ -22,6 +23,10 @@ public class Game {
     public void initialize(int height, int width) {
         stashedPicture = StashedPicture.generate(height, width);
         guessedPicture = new ServerGuessedPicture(stashedPicture, this);
+        context = new GameContext(
+                guessedPicture.getField(),
+                new Numbers(stashedPicture, NumbersSide.LEFT),
+                new Numbers(stashedPicture, NumbersSide.TOP));
     }
 
     public GameInfo getInfo() {
@@ -32,8 +37,8 @@ public class Game {
         return guessedPicture;
     }
 
-    public StashedPicture getStashedPicture() {
-        return stashedPicture;
+    public GameContext getContext() {
+        return context;
     }
 
     public void subscribeToUpdatedCells(Consumer<CellUpdatedNotification> responseListener) {

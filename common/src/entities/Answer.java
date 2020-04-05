@@ -1,8 +1,7 @@
-package picture;
+package entities;
 
 public enum Answer {
     NOTHING,
     SUCCESS,
-    MISTAKE,
-    WAIT
+    MISTAKE
 }

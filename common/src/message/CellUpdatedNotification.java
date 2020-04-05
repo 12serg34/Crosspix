@@ -1,6 +1,6 @@
 package message;
 
-import picture.Answer;
+import entities.Answer;
 
 public class CellUpdatedNotification extends Message {
     private static final long serialVersionUID = -5476441886572684946L;

@@ -1,4 +1,4 @@
-package picture;
+package entities;
 
 public enum CellState {
     BLANK,

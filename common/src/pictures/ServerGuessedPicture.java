@@ -1,12 +1,15 @@
-package picture;
+package pictures;
 
+import entities.Answer;
+import entities.CellState;
+import entities.Field;
 import entities.Game;
 import function.Consumer;
 import message.CellUpdatedNotification;
 
-public class ServerGuessedPicture implements GuessedPicture {
+public class ServerGuessedPicture {
     private final StashedPicture stashedPicture;
-    private final CellState[][] field;
+    private final Field field;
     private final int height;
     private final int width;
     private Game game;
@@ -18,25 +21,18 @@ public class ServerGuessedPicture implements GuessedPicture {
         this.stashedPicture = stashedPicture;
         height = stashedPicture.getHeight();
         width = stashedPicture.getWidth();
+        field = new Field(height, width);
         this.game = game;
-        field = new CellState[height][width];
-        initializeField();
     }
 
-    private void initializeField() {
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                field[i][j] = CellState.BLANK;
-            }
-        }
+    public Field getField() {
+        return field;
     }
 
-    @Override
     public int getHeight() {
         return height;
     }
 
-    @Override
     public int getWidth() {
         return width;
     }
@@ -46,32 +42,20 @@ public class ServerGuessedPicture implements GuessedPicture {
     }
 
     public Answer discoverRequest(int i, int j) {
-        if (field[i][j] == CellState.BLANK) {
+        if (field.getCellState(i, j) == CellState.BLANK) {
             if (stashedPicture.getCell(i, j)) {
-                field[i][j] = CellState.FULL;
+                field.setCellState(i, j, CellState.FULL);
                 amountOfDiscoveredCells++;
                 tryOfComplete();
                 return Answer.SUCCESS;
             } else {
-                field[i][j] = CellState.EMPTY;
+                field.setCellState(i, j, CellState.EMPTY);
                 return Answer.MISTAKE;
             }
         }
         return Answer.NOTHING;
     }
 
-    public CellState toggleEmpty(int i, int j) {
-        switch (field[i][j]) {
-            case BLANK:
-                field[i][j] = CellState.EMPTY;
-                break;
-            case EMPTY:
-                field[i][j] = CellState.BLANK;
-        }
-        return field[i][j];
-    }
-
-    @Override
     public void setUpdatedCellListener(Consumer<CellUpdatedNotification> listener) {
 
     }

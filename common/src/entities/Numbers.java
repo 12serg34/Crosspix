@@ -1,10 +1,13 @@
-package picture;
+package entities;
 
+import pictures.StashedPicture;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Numbers {
+public class Numbers implements Serializable {
     private int size;
     private int depth;
     private int[][] numbers;

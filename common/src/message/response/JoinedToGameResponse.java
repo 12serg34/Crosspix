@@ -1,16 +1,15 @@
 package message.response;
 
-import picture.StashedPicture;
+import entities.GameContext;
 
 public class JoinedToGameResponse extends Response {
-    private static final long serialVersionUID = 7873540238231988321L;
-    private final StashedPicture stashedPicture;
+    private final GameContext gameContext;
 
-    public JoinedToGameResponse(StashedPicture stashedPicture) {
-        this.stashedPicture = stashedPicture;
+    public JoinedToGameResponse(GameContext gameContext) {
+        this.gameContext = gameContext;
     }
 
-    public StashedPicture getStashedPicture() {
-        return stashedPicture;
+    public GameContext getGameContext() {
+        return gameContext;
     }
 }
