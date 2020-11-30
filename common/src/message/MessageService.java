@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class MessageService {
-    private String address;
-    private int port;
-    private MessageSender sender;
-    private Notifier notifier;
+    private final String address;
+    private final int port;
+    private final MessageSender sender;
+    private final Notifier notifier;
 
     public MessageService(String address, int port, MessageSender sender, Notifier notifier) {
         this.sender = sender;

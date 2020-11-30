@@ -57,9 +57,7 @@ public class ServerMessageProcessor {
 
     private GameCreatedResponse createGame(CreateGameRequest request) {
         game = gamesPool.putNewGame(request.getName());
-        int height = 5;
-        int width = 5;
-        game.initialize(height, width);
+        game.initialize(request.getHeight(), request.getWidth());
         game.subscribeToUpdatedCells(update -> service.send(update));
         return new GameCreatedResponse(game.getContext());
     }

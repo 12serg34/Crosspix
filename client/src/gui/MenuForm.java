@@ -59,12 +59,12 @@ public class MenuForm {
 
 
         connectButton.addActionListener(e -> {
-            sender = MessageService.connect("localhost", 14500, notifier);
+            sender = MessageService.connect("crosspix.hopto.org", 14500, notifier);
         });
         refreshGamesListButton.addActionListener(e -> sender.send(GamesInfoRequest.getInstance()));
         createGameButton.addActionListener(e -> {
             System.out.println("Creating game");
-            sender.send(new CreateGameRequest(gameNameTextField.getText()));
+            sender.send(new CreateGameRequest(gameNameTextField.getText(), 5, 5));
         });
         startButton.addActionListener(e -> {
             new GameForm(
