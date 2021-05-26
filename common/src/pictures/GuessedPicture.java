@@ -3,12 +3,12 @@ package pictures;
 import entities.Answer;
 import entities.CellState;
 import entities.Field;
-import function.Consumer;
 import message.CellUpdatedNotification;
-import message.MessageListener;
 import message.MessageSender;
 import message.Notifier;
 import message.request.DiscoverCellRequest;
+
+import java.util.function.Consumer;
 
 public class GuessedPicture {
     private final Field field;
@@ -17,15 +17,11 @@ public class GuessedPicture {
 
     public GuessedPicture(Field field,
                           MessageSender sender,
-                          Notifier notifier) {
+                          Notifier notifier)
+    {
         this.sender = sender;
         this.field = field;
-        notifier.subscribe(CellUpdatedNotification.class, new MessageListener<CellUpdatedNotification>() {
-            @Override
-            public void accept(CellUpdatedNotification response) {
-                GuessedPicture.this.cellUpdateReceived(response);
-            }
-        });
+        notifier.subscribe(CellUpdatedNotification.class, GuessedPicture.this::cellUpdateReceived);
     }
 
     public CellState getCellState(int i, int j) {

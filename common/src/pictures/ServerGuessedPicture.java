@@ -4,8 +4,9 @@ import entities.Answer;
 import entities.CellState;
 import entities.Field;
 import entities.Game;
-import function.Consumer;
 import message.CellUpdatedNotification;
+
+import java.util.function.Consumer;
 
 public class ServerGuessedPicture {
     private final StashedPicture stashedPicture;

@@ -1,12 +1,12 @@
 package entities;
 
-import function.Consumer;
 import message.CellUpdatedNotification;
 import pictures.ServerGuessedPicture;
 import pictures.StashedPicture;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Game {
     private GameInfo info;

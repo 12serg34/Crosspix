@@ -28,7 +28,7 @@ public class MenuForm {
     private JButton createGameButton;
     private JLabel pictureLabel;
     private JButton startButton;
-    private JList gamesList;
+    private JList<GameInfo> gamesList;
     private JTextField gameNameTextField;
     private JButton refreshGamesListButton;
     private JButton joinButton;
@@ -42,15 +42,11 @@ public class MenuForm {
             connectLabel.setText("connected");
             sender.send(GamesInfoRequest.getInstance());
         });
-        notifier.subscribe(GameCreatedResponse.class, response -> {
-            gameContext = response.getGameContext();
-        });
-        notifier.subscribe(JoinedToGameResponse.class, response -> {
-            gameContext = response.getGameContext();
-        });
+        notifier.subscribe(GameCreatedResponse.class, response -> gameContext = response.getGameContext());
+        notifier.subscribe(JoinedToGameResponse.class, response -> gameContext = response.getGameContext());
         notifier.subscribe(GamesInfoResponse.class, response -> {
             gamesInfo = response.getGamesInfo();
-            gamesList.setListData(gamesInfo.toArray());
+            gamesList.setListData(gamesInfo.toArray(new GameInfo[] {}));
         });
         notifier.subscribe(CellDiscoveredResponse.class, response -> {
         });

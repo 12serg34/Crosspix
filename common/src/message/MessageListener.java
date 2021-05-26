@@ -1,6 +1,6 @@
 package message;
 
-import function.Consumer;
+import java.util.function.Consumer;
 
 public interface MessageListener<T extends Message> extends Consumer<T> {
 

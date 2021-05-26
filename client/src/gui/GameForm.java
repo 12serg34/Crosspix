@@ -24,7 +24,6 @@ public class GameForm {
     private static final EnumMap<Answer, Color> answerToColor;
     private static final Color WAIT_COLOR = Color.BLUE;
 
-
     static {
         stateToColor = new EnumMap<>(CellState.class);
         stateToColor.put(CellState.FULL, Color.BLACK);
