@@ -1,7 +1,15 @@
-package gui;
-
 import entities.GameContext;
 import entities.GameInfo;
+import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import message.MessageSender;
 import message.MessageService;
 import message.Notifier;
@@ -10,14 +18,12 @@ import message.request.CreateGameRequest;
 import message.request.GamesInfoRequest;
 import message.request.JoinToGameRequest;
 import message.request.StopSessionRequest;
-import message.response.*;
+import message.response.CellDiscoveredResponse;
+import message.response.GameCreatedResponse;
+import message.response.GamesInfoResponse;
+import message.response.JoinedToGameResponse;
+import message.response.PongResponse;
 import pictures.GuessedPicture;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.List;
 
 public class MenuForm {
     private static final Dimension PREFERRED_FORM_SIZE = new Dimension(800, 800);
@@ -46,17 +52,19 @@ public class MenuForm {
         notifier.subscribe(JoinedToGameResponse.class, response -> gameContext = response.getGameContext());
         notifier.subscribe(GamesInfoResponse.class, response -> {
             gamesInfo = response.getGamesInfo();
-            gamesList.setListData(gamesInfo.toArray(new GameInfo[] {}));
+            gamesList.setListData(gamesInfo.toArray(new GameInfo[]{}));
         });
         notifier.subscribe(CellDiscoveredResponse.class, response -> {
         });
         notifier.subscribe(SessionStoppedNotification.class, response -> {
         });
 
-
+        Configuration configuration = new Configuration();
+        configuration.readProperties();
         connectButton.addActionListener(e -> {
-            sender = MessageService.connect("crosspix.hopto.org", 14500, notifier);
+            sender = MessageService.connect(configuration.getHost(), configuration.getPort(), notifier);
         });
+
         refreshGamesListButton.addActionListener(e -> sender.send(GamesInfoRequest.getInstance()));
         createGameButton.addActionListener(e -> {
             System.out.println("Creating game");

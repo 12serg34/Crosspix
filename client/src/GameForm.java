@@ -1,19 +1,24 @@
-package gui;
-
 import entities.Answer;
 import entities.CellState;
 import entities.Numbers;
-import message.CellUpdatedNotification;
-import pictures.GuessedPicture;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.EnumMap;
 import java.util.HashMap;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import message.CellUpdatedNotification;
+import pictures.GuessedPicture;
 
 public class GameForm {
     private static final Font DEFAULT_FONT = new Font("TimesNewRoman", Font.PLAIN, 32);
